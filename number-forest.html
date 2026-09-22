@@ -1,0 +1,1655 @@
+<title>數字森林闖關</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2140; --ink-soft:#5b527a; --bg:#fbf6e9; --bg2:#eef5e6;
+    --card:#ffffff; --card-border:#e7ded0; --accent:#ff6b4a; --accent-ink:#ffffff;
+    --accent2:#2f9e8f; --gold:#ffb43c; --wrong:#e5484d; --right:#2f9e5a;
+    --shadow: 0 6px 0 rgba(43,33,64,0.08), 0 10px 24px rgba(43,33,64,0.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#f1ece0; --ink-soft:#c9c2df; --bg:#1b2420; --bg2:#212c26;
+      --card:#26332c; --card-border:#3a4a40; --accent:#ff8a68; --accent-ink:#26170f;
+      --accent2:#4bc2b0; --gold:#ffc45e; --wrong:#ff6b6f; --right:#57d17f;
+      --shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#f1ece0; --ink-soft:#c9c2df; --bg:#1b2420; --bg2:#212c26;
+    --card:#26332c; --card-border:#3a4a40; --accent:#ff8a68; --accent-ink:#26170f;
+    --accent2:#4bc2b0; --gold:#ffc45e; --wrong:#ff6b6f; --right:#57d17f;
+    --shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 24px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Baloo 2","PingFang TC","Microsoft JhengHei","Heiti TC",-apple-system,sans-serif;
+    padding-inline:16px; padding-block:18px 40px; line-height:1.8;
+  }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  p{margin:0;}
+  button{ font-family:inherit; }
+  ruby{ ruby-position:inter-character; }
+  rt{ font-size:0.62em; color:var(--ink-soft); font-weight:700; user-select:none; margin-inline-start:1px; }
+  body.zy-off rt{ display:none; }
+  .btn{
+    font-family:inherit; font-weight:700; font-size:16px; border-radius:14px; border:none;
+    padding:12px 18px; cursor:pointer; background:var(--card); color:var(--ink);
+    border:2px solid var(--card-border); box-shadow:var(--shadow);
+    transition:transform .08s ease;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:none; }
+  .btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:transparent; }
+  .btn.ghost{ background:transparent; box-shadow:none; }
+  .btn:focus-visible{ outline:3px solid var(--accent2); outline-offset:2px; }
+
+  #app{ max-width:920px; margin:0 auto; position:relative; }
+  .hub-hero{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background:linear-gradient(135deg,var(--bg2),var(--bg));
+    border:2px solid var(--card-border); border-radius:22px; padding:22px;
+    margin-bottom:20px; overflow:hidden; position:relative; flex-wrap:wrap;
+  }
+  .hub-hero .txt{ max-width:480px; }
+  .hub-hero .eyebrow{ font-size:14px; letter-spacing:.06em; color:var(--accent2); font-weight:700; }
+  .hub-hero h1{ font-size:clamp(26px,5vw,36px); font-weight:800; margin-top:6px; }
+  .hub-hero .sub{ color:var(--ink-soft); font-size:16px; margin-top:10px; line-height:2.1; }
+  .hub-hero .mascot{ font-size:74px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.15)); }
+  .hub-controls{ display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .stars-total{
+    display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:15px;
+    background:var(--card); border:2px solid var(--card-border); border-radius:999px; padding:8px 16px;
+  }
+  #zy-toggle{ font-size:14px; padding:8px 14px; }
+
+  .stage-grid{ display:flex; flex-direction:column; gap:26px; }
+  .cat-section .cat-title{
+    font-size:18px; font-weight:800; margin-bottom:12px; padding-left:2px;
+    border-left:6px solid var(--accent); padding-left:10px; line-height:1.8;
+  }
+  .cat-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+  .stage-card{
+    text-align:left; background:var(--card); border:2px solid var(--card-border); border-radius:18px;
+    padding:16px; cursor:pointer; position:relative; box-shadow:var(--shadow); color:var(--ink);
+    display:flex; flex-direction:column; gap:8px; min-height:158px;
+  }
+  .stage-card:active{ transform:translateY(3px); box-shadow:none; }
+  .stage-card .code{ position:absolute; top:10px; right:12px; font-size:10px; font-family:"Courier New",monospace; color:var(--ink-soft); opacity:.7; }
+  .stage-card .icon{ font-size:34px; }
+  .stage-card .title{ font-size:19px; font-weight:800; line-height:1.9; }
+  .stage-card .desc{ font-size:14px; color:var(--ink-soft); line-height:2; flex:1; }
+  .stage-card .stars{ font-size:15px; letter-spacing:1px; }
+  .star-empty{ opacity:.28; }
+
+  #game-overlay{ position:fixed; inset:0; background:var(--bg); z-index:50; overflow-y:auto; height:100%; }
+  .topbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:5;
+    display:flex; align-items:center; gap:12px; padding:14px 16px;
+    background:var(--bg); border-bottom:2px solid var(--card-border);
+  }
+  .topbar .back{ background:var(--card); border:2px solid var(--card-border); border-radius:12px; padding:8px 12px; font-weight:700; cursor:pointer; color:var(--ink); }
+  .topbar .ttl{ font-weight:800; font-size:17px; flex:1; line-height:1.9; }
+  .topbar .prog{ font-size:13px; color:var(--ink-soft); font-weight:700; white-space:nowrap; }
+  .game-body{ max-width:640px; margin:0 auto; padding:22px 16px 40px; }
+
+  .progressbar{ height:8px; border-radius:99px; background:var(--bg2); border:1px solid var(--card-border); overflow:hidden; margin-bottom:22px; }
+  .progressbar .fill{ height:100%; background:var(--accent2); transition:width .3s ease; }
+
+  .q-text{ font-size:19px; font-weight:700; text-align:center; margin-top:18px; line-height:2.1; }
+  .quiz-prompt{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .quiz-choices{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-top:24px; }
+  .choice-btn{
+    background:var(--card); border:2px solid var(--card-border); border-radius:16px; padding:14px 10px;
+    font-size:18px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; min-height:64px; text-align:center; line-height:1.8;
+  }
+  .choice-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .choice-btn.correct{ background:var(--right); color:#fff; border-color:transparent; }
+  .choice-btn.correct rt, .choice-btn.wrong rt{ color:#fff; }
+  .choice-btn.wrong{ background:var(--wrong); color:#fff; border-color:transparent; animation:shake .3s; }
+  .choice-btn[disabled]{ cursor:default; }
+  @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  .feedback{ text-align:center; margin-top:18px; font-weight:700; font-size:16px; min-height:26px; line-height:1.9; }
+  .feedback.ok{ color:var(--right); }
+  .feedback.no{ color:var(--wrong); }
+  .nextbar{ display:flex; justify-content:center; margin-top:18px; }
+
+  .num{ font-family:"Baloo 2",sans-serif; font-weight:800; font-size:22px; }
+  .emoji-lg{ font-size:34px; }
+
+  .results{ text-align:center; padding-top:20px; }
+  .results .stars-anim{ font-size:48px; letter-spacing:6px; margin:14px 0; }
+  .results .stars-anim span{ display:inline-block; opacity:0; transform:scale(.3); animation:pop .4s forwards; }
+  .results .stars-anim span:nth-child(1){animation-delay:.05s;}
+  .results .stars-anim span:nth-child(2){animation-delay:.25s;}
+  .results .stars-anim span:nth-child(3){animation-delay:.45s;}
+  @keyframes pop{ to{opacity:1; transform:scale(1);} }
+  .results .msg{ font-size:17px; color:var(--ink-soft); margin-bottom:20px; line-height:2; }
+  .results .btnrow{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  .blocks{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; justify-content:center; padding:10px; }
+  .rod{ display:grid; grid-template-columns:repeat(2,9px); grid-auto-rows:9px; gap:2px; background:var(--accent2); padding:5px; border-radius:6px; }
+  .rod span{ width:9px; height:9px; background:#fff; border-radius:2px; }
+  .onesgrp{ display:flex; flex-wrap:wrap; gap:3px; width:24px; align-content:flex-end; }
+  .onesgrp span{ width:10px; height:10px; background:var(--accent); border-radius:50%; }
+  .blocks-choice{ padding:6px; }
+
+  .battle{ display:flex; align-items:center; justify-content:center; gap:18px; }
+  .fighter{ text-align:center; }
+  .fighter .mface{ font-size:46px; }
+  .fighter .num{ font-size:26px; margin-top:2px; display:block; }
+  .vs{ font-weight:800; color:var(--accent); font-size:14px; }
+
+  .queue{ display:flex; gap:10px; justify-content:center; overflow-x:auto; padding:10px 4px; }
+  .queue .slot{ text-align:center; flex:0 0 auto; }
+  .queue .slot .a{ font-size:30px; }
+  .queue .slot .p{ font-size:11px; color:var(--ink-soft); font-weight:700; }
+  .queue .trophy{ font-size:30px; align-self:center; }
+
+  .padrow{ display:flex; gap:10px; justify-content:center; padding:14px 4px; flex-wrap:wrap; }
+  .pad{ background:var(--bg2); border:2px solid var(--card-border); border-radius:50% / 40%; padding:10px 14px; font-weight:800; min-width:34px; text-align:center; position:relative; }
+  .pad.blank{ background:var(--card); border-style:dashed; color:var(--accent); }
+  .pad .frog{ position:absolute; top:-26px; left:50%; transform:translateX(-50%); font-size:20px; }
+
+  .equation{ font-size:34px; font-weight:800; text-align:center; padding:20px 0; }
+
+  .bars{ display:flex; flex-direction:column; gap:16px; align-items:center; width:100%; padding:10px 0; }
+  .bar-row{ display:flex; align-items:center; gap:10px; width:100%; max-width:320px; }
+  .bar-row .lbl{ font-size:14px; font-weight:700; width:56px; flex:0 0 auto; }
+  .bar{ height:20px; background:var(--accent2); border-radius:8px; }
+  .unit-row{ display:flex; flex-direction:column; gap:4px; align-items:center; width:100%; max-width:300px; }
+  .unit-row .lbl{ font-size:14px; font-weight:700; }
+  .unit-row .units{ display:flex; gap:2px; flex-wrap:wrap; justify-content:center; max-width:260px; font-size:20px; }
+
+  .cal{ border-collapse:collapse; width:100%; max-width:320px; margin:10px auto; }
+  .cal th,.cal td{ text-align:center; padding:7px 2px; font-size:14px; }
+  .cal th{ color:var(--ink-soft); font-weight:700; }
+  .cal td{ border-radius:8px; font-weight:700; }
+
+  .shop{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .item-card{ background:var(--card); border:2px solid var(--card-border); border-radius:18px; padding:18px 26px; text-align:center; box-shadow:var(--shadow); }
+  .item-card .em{ font-size:44px; }
+  .item-card .nm{ font-weight:700; margin-top:4px; font-size:16px; }
+  .item-card .pr{ font-size:24px; font-weight:800; color:var(--accent); margin-top:6px; }
+  .paytotal{ font-size:17px; font-weight:800; background:var(--bg2); border-radius:12px; padding:8px 16px; }
+  .coin-tray{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .coin{
+    width:58px; height:58px; border-radius:50%; border:3px solid var(--card-border); background:var(--gold);
+    color:#4a2e00; font-weight:800; font-size:14px; cursor:pointer; box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .coin:active{ transform:translateY(3px); box-shadow:none; }
+  .shop-actions{ display:flex; gap:10px; }
+  .shop-msg{ min-height:24px; font-weight:700; line-height:1.8; }
+
+  .towers-row{ display:flex; align-items:flex-end; gap:16px; justify-content:center; padding:10px 4px 4px; min-height:140px; }
+  .tower{ display:flex; flex-direction:column-reverse; align-items:center; gap:3px; }
+  .voxel{
+    width:34px; height:30px; border-radius:5px; background:var(--accent2);
+    box-shadow: inset -6px -6px 0 rgba(0,0,0,0.16), inset 5px 5px 0 rgba(255,255,255,0.28);
+  }
+  .unit-row .voxel{ width:26px; height:23px; }
+  .side-by-side{ display:flex; align-items:flex-end; gap:24px; justify-content:center; flex-wrap:wrap; padding:10px 0; }
+  .blk-grid{ position:relative; margin:0 auto; }
+  .blk{
+    position:absolute; display:flex; align-items:center; justify-content:center;
+    background:var(--accent2); color:#fff; font-weight:800; font-size:14px;
+    border-radius:6px; box-shadow: inset -3px -3px 0 rgba(0,0,0,0.16), inset 3px 3px 0 rgba(255,255,255,0.22);
+  }
+  .tri{
+    position:absolute; display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px;
+    background:var(--accent); border:1px solid var(--bg);
+  }
+  .tri span{ color:#fff; font-weight:800; font-size:11px; }
+  .measure-stack{ display:flex; flex-direction:column; }
+  .mbar{ height:18px; border-radius:5px 5px 0 0; }
+  .ruler{ display:flex; }
+  .ruler .cell{ width:24px; height:18px; border:1px solid var(--card-border); box-sizing:border-box; margin-right:-1px; }
+
+  .login-card{
+    background:var(--card); border:2px solid var(--card-border); border-radius:18px;
+    padding:18px; margin-bottom:20px; box-shadow:var(--shadow);
+  }
+  .login-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .login-row select, .login-row input{
+    flex:1; min-width:140px; padding:11px 12px; border-radius:12px; border:2px solid var(--card-border);
+    font-size:15px; font-family:inherit; background:var(--card); color:var(--ink);
+  }
+  .login-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  #who-badge{ font-size:13px; padding:8px 14px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:60;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal-card{
+    background:var(--card); border-radius:18px; padding:22px; max-width:420px; width:100%;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3); color:var(--ink);
+  }
+
+  [hidden]{ display:none !important; }
+</style>
+
+<div id="app">
+  <div class="hub-hero">
+    <div class="txt">
+      <div class="eyebrow" id="hero-eyebrow"></div>
+      <h1>🌲 數字森林闖關</h1>
+      <p class="sub" id="hero-sub"></p>
+      <div class="hub-controls">
+        <div class="stars-total" id="stars-total"></div>
+        <button class="btn ghost" id="zy-toggle"></button>
+        <button class="btn ghost" id="who-badge" hidden></button>
+        <button class="btn ghost" id="gear-btn" title="teacher settings" style="padding:8px 12px;">⚙️</button>
+      </div>
+    </div>
+    <div class="mascot">🦉</div>
+  </div>
+  <div class="login-card" id="login-card" hidden></div>
+  <div class="stage-grid" id="stage-grid"></div>
+</div>
+
+<div id="settings-modal" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <h3 style="margin:0 0 4px;">⚙️ 老師專用設定</h3>
+    <p style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;line-height:1.9;">
+      貼上你部署好的 Google Apps Script 網址，孩子玩完每一關就會自動把成績送回你的 Google 表單。
+    </p>
+    <input id="api-input" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%;padding:10px;border-radius:10px;border:2px solid var(--card-border);font-size:13px;margin-bottom:10px;box-sizing:border-box;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn primary" id="api-save">儲存</button>
+      <button class="btn" id="settings-close">關閉</button>
+    </div>
+    <p id="api-status" style="margin-top:12px;font-size:13px;color:var(--ink-soft);line-height:1.8;"></p>
+  </div>
+</div>
+
+<div id="game-overlay" hidden>
+  <div class="topbar">
+    <button class="back" id="btn-back"></button>
+    <div class="ttl" id="game-ttl"></div>
+    <div class="prog" id="game-prog"></div>
+  </div>
+  <div class="game-body" id="game-body"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= zhuyin dictionary & annotator ================= */
+  var CHAR_ZY = {
+    "數":"ㄕㄨˇ","字":"ㄗˋ","森":"ㄙㄣ","林":"ㄌㄧㄣˊ","闖":"ㄔㄨㄤˇ","關":"ㄍㄨㄢ",
+    "一":"ㄧ","年":"ㄋㄧㄢˊ","級":"ㄐㄧˊ","樂":"ㄌㄜˋ","園":"ㄩㄢˊ","個":"ㄍㄜˋ","卡":"ㄎㄚˇ",
+    "起":"ㄑㄧˇ","玩":"ㄨㄢˊ","遊":"ㄧㄡˊ","戲":"ㄒㄧˋ","學":"ㄒㄩㄝˊ","已":"ㄧˇ","經":"ㄐㄧㄥ",
+    "得":"ㄉㄜˊ","到":"ㄉㄠˋ","顆":"ㄎㄜ","星":"ㄒㄧㄥ","共":"ㄍㄨㄥˋ","返":"ㄈㄢˇ","回":"ㄏㄨㄟˊ",
+    "地":"ㄉㄧˋ","圖":"ㄊㄨˊ","再":"ㄗㄞˋ","次":"ㄘˋ","下":"ㄒㄧㄚˋ","題":"ㄊㄧˊ","查":"ㄔㄚˊ",
+    "看":"ㄎㄢˋ","結":"ㄐㄧㄝˊ","果":"ㄍㄨㄛˇ","答":"ㄉㄚˊ","對":"ㄉㄨㄟˋ","了":"ㄌㄜ","太":"ㄊㄞˋ",
+    "棒":"ㄅㄤˋ","想":"ㄒㄧㄤˇ","正":"ㄓㄥˋ","確":"ㄑㄩㄝˋ","案":"ㄢˋ","是":"ㄕˋ","綠":"ㄌㄩˋ",
+    "色":"ㄙㄜˋ","的":"ㄉㄜ","第":"ㄉㄧˋ","多":"ㄉㄨㄛ","加":"ㄐㄧㄚ","油":"ㄧㄡˊ","你":"ㄋㄧˇ",
+    "會":"ㄏㄨㄟˋ","越":"ㄩㄝˋ","半":"ㄅㄢˋ","繼":"ㄐㄧˋ","續":"ㄒㄩˋ","很":"ㄏㄣˇ","不":"ㄅㄨˋ",
+    "錯":"ㄘㄨㄛˋ","喔":"ㄛ","快":"ㄎㄨㄞˋ","要":"ㄧㄠˋ","全":"ㄑㄩㄢˊ","部":"ㄅㄨˋ","小":"ㄒㄧㄠˇ",
+    "達":"ㄉㄚˊ","人":"ㄖㄣˊ","積":"ㄐㄧ","木":"ㄇㄨˋ","屋":"ㄨ","認":"ㄖㄣˋ","識":"ㄕˋ","以":"ㄧˇ",
+    "內":"ㄋㄟˋ","位":"ㄨㄟˋ","值":"ㄓˊ","大":"ㄉㄚˋ","冒":"ㄇㄠˋ","險":"ㄒㄧㄢˇ","分":"ㄈㄣ",
+    "辨":"ㄅㄧㄢˋ","十":"ㄕˊ","和":"ㄏㄢˋ","比":"ㄅㄧˇ","誰":"ㄕㄟˊ","決":"ㄐㄩㄝˊ","排":"ㄆㄞˊ",
+    "隊":"ㄉㄨㄟˋ","獎":"ㄐㄧㄤˇ","盃":"ㄅㄟ","順":"ㄕㄨㄣˋ","序":"ㄒㄩˋ","青":"ㄑㄧㄥ","蛙":"ㄨㄚ",
+    "跳":"ㄊㄧㄠˋ","法":"ㄈㄚˇ","減":"ㄐㄧㄢˇ","用":"ㄩㄥˋ","算":"ㄙㄨㄢˋ","閱":"ㄩㄝˋ","讀":"ㄉㄨˊ",
+    "理":"ㄌㄧˇ","解":"ㄐㄧㄝˇ","偵":"ㄓㄣ","探":"ㄊㄢˋ","故":"ㄍㄨˋ","事":"ㄕˋ","找":"ㄓㄠˇ",
+    "出":"ㄔㄨ","商":"ㄕㄤ","店":"ㄉㄧㄢˋ","買":"ㄇㄞˇ","東":"ㄉㄨㄥ","西":"ㄒㄧ","錢":"ㄑㄧㄢˊ",
+    "幣":"ㄅㄧˋ","練":"ㄌㄧㄢˋ","習":"ㄒㄧˊ","付":"ㄈㄨˋ","時":"ㄕˊ","鐘":"ㄓㄨㄥ","精":"ㄐㄧㄥ",
+    "靈":"ㄌㄧㄥˊ","懂":"ㄉㄨㄥˇ","整":"ㄓㄥˇ","點":"ㄉㄧㄢˇ","曆":"ㄌㄧˋ","尋":"ㄒㄩㄣˊ","寶":"ㄅㄠˇ",
+    "上":"ㄕㄤˋ","期":"ㄑㄧˊ","立":"ㄌㄧˋ","方":"ㄈㄤ","體":"ㄊㄧˇ","高":"ㄍㄠ","矮":"ㄞˇ",
+    "量":"ㄌㄧㄤˊ","長":"ㄔㄤˊ","短":"ㄉㄨㄢˇ","抓":"ㄓㄨㄚ","路":"ㄌㄨˋ","線":"ㄒㄧㄢˋ","走":"ㄗㄡˇ",
+    "哪":"ㄋㄚˇ","條":"ㄊㄧㄠˊ","較":"ㄐㄧㄠˋ","堆":"ㄉㄨㄟ","邊":"ㄅㄧㄢ","樣":"ㄧㄤˋ","右":"ㄧㄡˋ",
+    "左":"ㄗㄨㄛˇ","幾":"ㄐㄧˇ","每":"ㄇㄟˇ","片":"ㄆㄧㄢˋ","荷":"ㄏㄜˊ","葉":"ㄧㄝˋ","有":"ㄧㄡˇ",
+    "蘋":"ㄆㄧㄥˊ","又":"ㄧㄡˋ","摘":"ㄓㄞ","現":"ㄒㄧㄢˋ","原":"ㄩㄢˊ","本":"ㄅㄣˇ","氣":"ㄑㄧˋ",
+    "球":"ㄑㄧㄡˊ","媽":"ㄇㄚ","糖":"ㄊㄤˊ","吃":"ㄔ","掉":"ㄉㄧㄠˋ","還":"ㄏㄞˊ","剩":"ㄕㄥˋ",
+    "書":"ㄕㄨ","架":"ㄐㄧㄚˋ","借":"ㄐㄧㄝˋ","鉛":"ㄑㄧㄢ","筆":"ㄅㄧˇ","盒":"ㄏㄜˊ","裡":"ㄌㄧˇ",
+    "枝":"ㄓ","今":"ㄐㄧㄣ","天":"ㄊㄧㄢ","她":"ㄊㄚ","給":"ㄍㄟˇ","同":"ㄊㄨㄥˊ","請":"ㄑㄧㄥˇ",
+    "問":"ㄨㄣˋ","班":"ㄅㄢ","女":"ㄋㄩˇ","生":"ㄕㄥ","男":"ㄋㄢˊ","其":"ㄑㄧˊ","中":"ㄓㄨㄥ",
+    "假":"ㄐㄧㄚˋ","沒":"ㄇㄟˊ","來":"ㄌㄞˊ","課":"ㄎㄜˋ","魚":"ㄩˊ","缸":"ㄍㄤ","紅":"ㄏㄨㄥˊ",
+    "黑":"ㄏㄟ","放":"ㄈㄤˋ","進":"ㄐㄧㄣˋ","元":"ㄩㄢˊ","爸":"ㄅㄚˋ","他":"ㄊㄚ","當":"ㄉㄤ",
+    "作":"ㄗㄨㄛˋ","勵":"ㄌㄧˋ","操":"ㄘㄠ","場":"ㄔㄤˇ","隻":"ㄓ","狗":"ㄍㄡˇ","在":"ㄗㄞˋ",
+    "牠":"ㄊㄚ","們":"ㄇㄣ","白":"ㄅㄞˊ","過":"ㄍㄨㄛˋ","兒":"ㄦ","跑":"ㄆㄠˇ","彈":"ㄉㄢˋ",
+    "珠":"ㄓㄨ","兩":"ㄌㄧㄤˇ","張":"ㄓㄤ","貼":"ㄊㄧㄝ","紙":"ㄓˇ","拿":"ㄋㄚˊ","剛":"ㄍㄤ",
+    "好":"ㄏㄠˇ","款":"ㄎㄨㄢˇ","闆":"ㄅㄢˇ","謝":"ㄒㄧㄝˋ","囉":"ㄌㄛ","試":"ㄕˋ","夠":"ㄍㄡˋ",
+    "麵":"ㄇㄧㄢˋ","包":"ㄅㄠ","汁":"ㄓ","蠟":"ㄌㄚˋ","記":"ㄐㄧˋ","偶":"ㄡˇ","具":"ㄐㄩˋ",
+    "巴":"ㄅㄚ","士":"ㄕˋ","厲":"ㄌㄧˋ","害":"ㄏㄞˋ","都":"ㄉㄡ","就":"ㄐㄧㄡˋ","購":"ㄍㄡˋ",
+    "物":"ㄨˋ","成":"ㄔㄥˊ","功":"ㄍㄨㄥ","面":"ㄇㄧㄢˋ","月":"ㄩㄝˋ","日":"ㄖˋ","隔":"ㄍㄜˊ",
+    "疊":"ㄉㄧㄝˊ","緞":"ㄉㄨㄢˋ","帶":"ㄉㄞˋ","迴":"ㄏㄨㄟˊ","紋":"ㄨㄣˊ","針":"ㄓㄣ","步":"ㄅㄨˋ",
+    "明":"ㄇㄧㄥˊ","美":"ㄇㄟˇ","華":"ㄏㄨㄚˊ","阿":"ㄚ","強":"ㄑㄧㄤˊ","芳":"ㄈㄤ","傑":"ㄐㄧㄝˊ",
+    "妹":"ㄇㄟˋ","弟":"ㄉㄧˋ","二":"ㄦˋ","三":"ㄙㄢ","四":"ㄙˋ","五":"ㄨˇ","六":"ㄌㄧㄡˋ",
+    "七":"ㄑㄧ","八":"ㄅㄚ","九":"ㄐㄧㄡˇ","注":"ㄓㄨˋ","音":"ㄧㄣ","開":"ㄎㄞ","尺":"ㄔˇ",
+    "少":"ㄕㄠˇ","老":"ㄌㄠˇ","這":"ㄓㄜˋ","重":"ㄔㄨㄥˊ","清":"ㄑㄧㄥ","空":"ㄎㄨㄥ",
+    "目":"ㄇㄨˋ","前":"ㄑㄧㄢˊ","彎":"ㄨㄢ","曲":"ㄑㄩ","格":"ㄍㄜˊ","差":"ㄔㄚˋ","從":"ㄘㄨㄥˊ",
+    "搬":"ㄅㄢ","家":"ㄐㄧㄚ","號":"ㄏㄠˋ","被":"ㄅㄟˋ","移":"ㄧˊ","動":"ㄉㄨㄥˋ","別":"ㄅㄧㄝˊ",
+    "甲":"ㄐㄧㄚˇ","乙":"ㄧˇ","丙":"ㄅㄧㄥˇ","間":"ㄐㄧㄢ","另":"ㄌㄧㄥˋ","最":"ㄗㄨㄟˋ",
+    "新":"ㄒㄧㄣ","馬":"ㄇㄚˇ","說":"ㄕㄨㄛ","也":"ㄧㄝˇ","能":"ㄋㄥˊ",
+    "姓":"ㄒㄧㄥˋ","名":"ㄇㄧㄥˊ","選":"ㄒㄩㄢˇ","擇":"ㄗㄜˊ","始":"ㄕˇ","歡":"ㄏㄨㄢ","迎":"ㄧㄥˊ",
+    "先":"ㄒㄧㄢ","登":"ㄉㄥ","入":"ㄖㄨˋ","直":"ㄓˊ","師":"ㄕ","專":"ㄓㄨㄢ","設":"ㄕㄜˋ","定":"ㄉㄧㄥˋ",
+    "資":"ㄗ","料":"ㄌㄧㄠˋ","網":"ㄨㄤˇ","址":"ㄓˇ","儲":"ㄔㄨˊ","存":"ㄘㄨㄣˊ","連":"ㄌㄧㄢˊ",
+    "送":"ㄙㄨㄥˋ","失":"ㄕ","敗":"ㄅㄞˋ","切":"ㄑㄧㄝˋ",
+    "例":"ㄌㄧˋ","如":"ㄖㄨˊ","取":"ㄑㄩˇ","單":"ㄉㄢ","填":"ㄊㄧㄢˊ","寫":"ㄒㄧㄝˇ","尚":"ㄕㄤˋ","未":"ㄨㄟˋ",
+    "往":"ㄨㄤˇ","倒":"ㄉㄠˋ","退":"ㄊㄨㄟˋ","規":"ㄍㄨㄟ","律":"ㄌㄩˋ","份":"ㄈㄣˋ",
+    "身":"ㄕㄣ","站":"ㄓㄢˋ","箱":"ㄒㄧㄤ","子":"ㄗ","段":"ㄉㄨㄢˋ","玉":"ㄩˋ","智":"ㄓˋ",
+    "葵":"ㄎㄨㄟˊ","光":"ㄍㄨㄤ","丁":"ㄉㄧㄥ","刻":"ㄎㄜˋ","可":"ㄎㄜˇ","早":"ㄗㄠˇ","餐":"ㄘㄢ",
+    "午":"ㄨˇ","晚":"ㄨㄢˇ","睡":"ㄕㄨㄟˋ","覺":"ㄐㄧㄠˋ","國":"ㄍㄨㄛˊ","慶":"ㄑㄧㄥˋ","煙":"ㄧㄢ",
+    "火":"ㄏㄨㄛˇ","校":"ㄒㄧㄠˋ","運":"ㄩㄣˋ","那":"ㄋㄚˋ","合":"ㄏㄜˊ",
+    "與":"ㄩˇ","計":"ㄐㄧˋ","形":"ㄒㄧㄥˊ","活":"ㄏㄨㄛˊ","換":"ㄏㄨㄢˋ","交":"ㄐㄧㄠ",
+    "板":"ㄅㄢˇ","接":"ㄐㄧㄝ","平":"ㄆㄧㄥˊ","版":"ㄅㄢˇ","基":"ㄐㄧ","準":"ㄓㄨㄣˇ","只":"ㄓˇ"
+  };
+  var PHRASE_ZY = {
+    "數學":["ㄕㄨˋ","ㄒㄩㄝˊ"], "數字":["ㄕㄨˋ","ㄗˋ"], "一共":["ㄧˊ","ㄍㄨㄥˋ"],
+    "一樣":["ㄧˊ","ㄧㄤˋ"], "一次":["ㄧˊ","ㄘˋ"], "一個":["ㄧˊ","ㄍㄜ"], "一半":["ㄧˊ","ㄅㄢˋ"],
+    "一起":["ㄧˋ","ㄑㄧˇ"], "一題":["ㄧˋ","ㄊㄧˊ"], "一數":["ㄧˋ","ㄕㄨˇ"], "一堆":["ㄧˋ","ㄉㄨㄟ"],
+    "一量":["ㄧˋ","ㄌㄧㄤˊ"], "一比":["ㄧˋ","ㄅㄧˇ"], "一會":["ㄧˊ","ㄏㄨㄟˋ"], "一份":["ㄧˊ","ㄈㄣˋ"],
+    "不夠":["ㄅㄨˊ","ㄍㄡˋ"], "不錯":["ㄅㄨˊ","ㄘㄨㄛˋ"]
+  };
+  function az(text){
+    var out='', chars=Array.from(String(text)), i=0;
+    while(i<chars.length){
+      if(i+1<chars.length){
+        var two = chars[i]+chars[i+1];
+        if(PHRASE_ZY[two]){
+          out += '<ruby>'+chars[i]+'<rt>'+PHRASE_ZY[two][0]+'</rt></ruby>';
+          out += '<ruby>'+chars[i+1]+'<rt>'+PHRASE_ZY[two][1]+'</rt></ruby>';
+          i+=2; continue;
+        }
+      }
+      var ch = chars[i];
+      if(CHAR_ZY[ch]) out += '<ruby>'+ch+'<rt>'+CHAR_ZY[ch]+'</rt></ruby>';
+      else out += ch;
+      i++;
+    }
+    return out;
+  }
+
+  /* ================= utils ================= */
+  function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function pick(arr){ return arr[rand(0,arr.length-1)]; }
+  function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=rand(0,i); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+  function loadStars(id){ try{ return parseInt(localStorage.getItem('nf_stars_'+id)||'0',10); }catch(e){ return 0; } }
+  function saveStars(id,stars){ try{ var cur=loadStars(id); if(stars>cur) localStorage.setItem('nf_stars_'+id, String(stars)); }catch(e){} }
+  function totalStars(){ return STAGES.reduce(function(sum,s){ return sum+loadStars(s.id); },0); }
+  function starsHTML(n,animated){
+    var h='';
+    for(var i=0;i<3;i++){
+      var filled = i<n;
+      h += animated ? ('<span style="animation-delay:'+(i*.2+.05)+'s">'+(filled?'⭐':'☆')+'</span>')
+                    : ('<span class="'+(filled?'':'star-empty')+'">'+(filled?'⭐':'☆')+'</span>');
+    }
+    return h;
+  }
+  function computeStars(correct,total){
+    var pct = total? correct/total : 0;
+    if(pct>=0.85) return 3;
+    if(pct>=0.6) return 2;
+    if(pct>=0.35) return 1;
+    return 0;
+  }
+  function distinctExtras(correct,count,min,max,biasFns){
+    var set={}; set[correct]=true; var out=[];
+    (biasFns||[]).forEach(function(fn){
+      if(out.length>=count) return;
+      var v=clamp(Math.round(fn()),min,max);
+      if(!set[v]){ set[v]=true; out.push(v); }
+    });
+    var guard=0;
+    while(out.length<count && guard<40){
+      var v=rand(min,max);
+      if(!set[v]){ set[v]=true; out.push(v); }
+      guard++;
+    }
+    return out;
+  }
+  function zyPref(){ try{ return localStorage.getItem('nf_zy')!=='0'; }catch(e){ return true; } }
+  function setZyPref(v){ try{ localStorage.setItem('nf_zy', v?'1':'0'); }catch(e){} }
+
+  var NAMES = ['小明','小美','小華','阿強','小芳','小傑','妹妹','弟弟'];
+
+  /* ================= stage registry (filled below) ================= */
+  var STAGES = [];
+
+  /* ================= hub ================= */
+  var CATS = [
+    {id:'number', label:'數與位值'},
+    {id:'calc', label:'計算'},
+    {id:'shape', label:'量與形'},
+    {id:'time', label:'時間與生活'}
+  ];
+
+  /* ================= identity / teacher backend ================= */
+  function getIdentity(){
+    try{
+      var cls = localStorage.getItem('nf_class')||'';
+      var name = localStorage.getItem('nf_name')||'';
+      return (cls && name) ? {cls:cls, name:name} : null;
+    }catch(e){ return null; }
+  }
+  function setIdentity(cls,name){ try{ localStorage.setItem('nf_class',cls); localStorage.setItem('nf_name',name); }catch(e){} }
+  function clearIdentity(){ try{ localStorage.removeItem('nf_class'); localStorage.removeItem('nf_name'); }catch(e){} }
+  function getApiUrl(){ try{ return localStorage.getItem('nf_api')||''; }catch(e){ return ''; } }
+  function setApiUrl(u){ try{ localStorage.setItem('nf_api', u); }catch(e){} }
+  var sessionGuest = false;
+
+  function loadRoster(cb){
+    var api = getApiUrl();
+    if(!api){ cb(null); return; }
+    var sep = api.indexOf('?')>-1 ? '&' : '?';
+    fetch(api+sep+'action=roster')
+      .then(function(r){ return r.json(); })
+      .then(function(data){ cb(data && data.roster ? data.roster : null); })
+      .catch(function(){ cb(null); });
+  }
+
+  function submitRecord(stage, correct, total, stars){
+    var api = getApiUrl();
+    var id = getIdentity();
+    if(!api || !id) return;
+    var payload = {
+      className: id.cls, studentName: id.name,
+      stageId: stage.id, stageTitle: stage.title, category: stage.cat,
+      correct: correct||0, total: total||0, stars: stars||0
+    };
+    try{ fetch(api, { method:'POST', body: JSON.stringify(payload) }).catch(function(){}); }catch(e){}
+  }
+  var grid = document.getElementById('stage-grid');
+  function renderHub(){
+    document.getElementById('hero-eyebrow').innerHTML = az('一年級‧數學樂園');
+    document.getElementById('hero-sub').innerHTML = az(STAGES.length+'個關卡，一起玩遊戲，學數學！');
+    document.getElementById('btn-back').innerHTML = az('返回');
+    grid.innerHTML = CATS.map(function(cat){
+      var stagesInCat = STAGES.filter(function(s){ return s.cat===cat.id; });
+      if(!stagesInCat.length) return '';
+      return '<div class="cat-section">'
+        + '<h2 class="cat-title">'+az(cat.label)+'</h2>'
+        + '<div class="cat-grid">'
+        + stagesInCat.map(function(s){
+            var st = loadStars(s.id);
+            return '<button class="stage-card" data-id="'+s.id+'">'
+              + '<span class="code">'+s.code+'</span>'
+              + '<span class="icon">'+s.emoji+'</span>'
+              + '<span class="title">'+az(s.title)+'</span>'
+              + '<span class="desc">'+az(s.desc)+'</span>'
+              + '<span class="stars">'+starsHTML(st,false)+'</span>'
+              + '</button>';
+          }).join('')
+        + '</div></div>';
+    }).join('');
+    document.getElementById('stars-total').innerHTML = '⭐ '+az('已經得到')+' '+totalStars()+' / '+(STAGES.length*3)+' '+az('顆星');
+    var zyBtn = document.getElementById('zy-toggle');
+    function renderZyBtn(){ zyBtn.innerHTML = az('注音') + '：' + (zyPref()? az('開') : az('關')); }
+    renderZyBtn();
+    zyBtn.onclick = function(){
+      var on = !zyPref();
+      setZyPref(on);
+      document.body.classList.toggle('zy-off', !on);
+      renderZyBtn();
+    };
+    document.body.classList.toggle('zy-off', !zyPref());
+    grid.querySelectorAll('.stage-card').forEach(function(btn){
+      btn.addEventListener('click', function(){ openStage(btn.dataset.id); });
+    });
+    renderLoginCard();
+  }
+
+  function renderLoginCard(){
+    var card = document.getElementById('login-card');
+    var badge = document.getElementById('who-badge');
+    var id = getIdentity();
+    if(id || sessionGuest){
+      card.hidden = true;
+      if(id){
+        badge.hidden = false;
+        badge.innerHTML = '👤 '+az(id.cls)+' '+az(id.name)+' · '+az('切換');
+        badge.onclick = function(){ clearIdentity(); sessionGuest=false; renderHub(); };
+      } else {
+        badge.hidden = true;
+      }
+      return;
+    }
+    badge.hidden = true;
+    card.hidden = false;
+    var api = getApiUrl();
+    card.innerHTML =
+      '<p class="q-text" style="margin-top:0;">'+az('請選擇你的班級和姓名')+'</p>'
+      + '<div class="login-row" id="login-row"></div>'
+      + '<div class="login-actions">'
+      + '<button class="btn primary" id="login-start">'+az('開始遊戲')+'</button>'
+      + '<button class="btn ghost" id="login-guest">'+az('先不登入，直接玩')+'</button>'
+      + '</div>';
+    var row = document.getElementById('login-row');
+    function renderManual(){
+      row.innerHTML =
+        '<input id="cls-input" placeholder="'+az('班級（例如：三年二班）')+'">'
+        + '<input id="name-input" placeholder="'+az('姓名')+'">';
+    }
+    function renderSelects(roster){
+      var classes = Object.keys(roster).sort();
+      row.innerHTML =
+        '<select id="cls-select"><option value="">'+az('選擇班級')+'</option>'
+        + classes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('')
+        + '</select>'
+        + '<select id="name-select"><option value="">'+az('選擇姓名')+'</option></select>';
+      document.getElementById('cls-select').addEventListener('change', function(){
+        var names = roster[this.value] || [];
+        var nameSel = document.getElementById('name-select');
+        nameSel.innerHTML = '<option value="">'+az('選擇姓名')+'</option>'
+          + names.map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join('');
+      });
+    }
+    if(api){
+      row.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">'+az('讀取班級名單中...')+'</p>';
+      loadRoster(function(roster){
+        if(roster && Object.keys(roster).length) renderSelects(roster);
+        else renderManual();
+      });
+    } else {
+      renderManual();
+    }
+    document.getElementById('login-start').addEventListener('click', function(){
+      var cls, name;
+      var clsSel = document.getElementById('cls-select'), nameSel = document.getElementById('name-select');
+      if(clsSel && nameSel){ cls = clsSel.value; name = nameSel.value; }
+      else {
+        var ci = document.getElementById('cls-input'), ni = document.getElementById('name-input');
+        cls = ci ? ci.value.trim() : ''; name = ni ? ni.value.trim() : '';
+      }
+      if(!cls || !name){
+        var msg = card.querySelector('.login-warn');
+        if(!msg){
+          msg = document.createElement('p');
+          msg.className = 'login-warn';
+          msg.style.color = 'var(--wrong)'; msg.style.fontWeight='700'; msg.style.marginTop='8px';
+          card.appendChild(msg);
+        }
+        msg.innerHTML = az('請填寫班級和姓名喔！');
+        return;
+      }
+      setIdentity(cls,name);
+      renderHub();
+    });
+    document.getElementById('login-guest').addEventListener('click', function(){
+      sessionGuest = true;
+      renderHub();
+    });
+  }
+
+  var gearBtn = document.getElementById('gear-btn');
+  var settingsModal = document.getElementById('settings-modal');
+  function updateApiStatus(){
+    var el = document.getElementById('api-status');
+    var v = getApiUrl();
+    el.innerHTML = v ? (az('已連接：')+'<br><span style="font-size:12px;word-break:break-all;">'+v+'</span>') : az('尚未設定網址');
+  }
+  gearBtn.addEventListener('click', function(){
+    document.getElementById('api-input').value = getApiUrl();
+    updateApiStatus();
+    settingsModal.hidden = false;
+  });
+  document.getElementById('settings-close').addEventListener('click', function(){ settingsModal.hidden = true; });
+  document.getElementById('api-save').addEventListener('click', function(){
+    var v = document.getElementById('api-input').value.trim();
+    setApiUrl(v);
+    updateApiStatus();
+    renderHub();
+  });
+
+  var overlay = document.getElementById('game-overlay');
+  var gameBody = document.getElementById('game-body');
+  var gameTtl = document.getElementById('game-ttl');
+  var gameProg = document.getElementById('game-prog');
+  document.getElementById('btn-back').addEventListener('click', closeStage);
+
+  function openStage(id){
+    var stage = STAGES.filter(function(s){ return s.id===id; })[0];
+    if(!stage) return;
+    gameTtl.innerHTML = stage.emoji+' '+az(stage.title);
+    gameProg.textContent = '';
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    stage.mk(gameBody, {
+      setProgress: function(i,total,correct){ gameProg.innerHTML = az('第')+' '+i+'/'+total+' '+az('題')+' · '+az('答對')+' '+correct; },
+      finish: function(stars,correct,total){ saveStars(stage.id, stars); submitRecord(stage, correct, total, stars); }
+    });
+  }
+  function closeStage(){
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+    gameBody.innerHTML = '';
+    renderHub();
+  }
+
+  /* ================= generic quiz engine ================= */
+  function runQuiz(container, ctx, total, buildQuestion){
+    var idx=0, correct=0;
+    renderQuestion();
+    function renderQuestion(){
+      ctx.setProgress(idx+1,total,correct);
+      var q = buildQuestion(idx);
+      var pct = Math.round((idx/total)*100);
+      container.innerHTML =
+        '<div class="progressbar"><div class="fill" style="width:'+pct+'%"></div></div>'
+        + '<div class="quiz-prompt">'+q.promptHTML+'</div>'
+        + '<div class="quiz-choices">'+q.choices.map(function(c,i){ return '<button class="choice-btn" data-i="'+i+'">'+c.html+'</button>'; }).join('')+'</div>'
+        + '<div class="feedback"></div>'
+        + '<div class="nextbar" hidden><button class="btn primary" id="next-btn">'+(idx+1>=total? az('查看結果')+' →' : az('下一題')+' →')+'</button></div>';
+      var answered=false;
+      var btns = Array.prototype.slice.call(container.querySelectorAll('.choice-btn'));
+      btns.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          if(answered) return;
+          answered = true;
+          var i = parseInt(btn.dataset.i,10);
+          var isCorrect = q.choices[i].correct;
+          if(isCorrect) correct++;
+          btns.forEach(function(b,bi){
+            b.disabled = true;
+            if(q.choices[bi].correct) b.classList.add('correct');
+            else if(bi===i) b.classList.add('wrong');
+          });
+          var fb = container.querySelector('.feedback');
+          fb.innerHTML = isCorrect ? az('答對了！太棒了 🎉') : az('再想想看，正確答案是綠色的');
+          fb.className = 'feedback ' + (isCorrect?'ok':'no');
+          container.querySelector('.nextbar').hidden = false;
+          ctx.setProgress(idx+1,total,correct);
+        });
+      });
+      container.querySelector('#next-btn').addEventListener('click', function(){
+        idx++;
+        if(idx<total) renderQuestion();
+        else showResults();
+      });
+    }
+    function showResults(){
+      var stars = computeStars(correct,total);
+      ctx.finish(stars,correct,total);
+      var msgs = [az('多加油，你會越來越棒！'), az('已經會一半了，繼續加油！'), az('很不錯喔，快要全對了！'), az('全部答對，你是數學小達人！')];
+      container.innerHTML =
+        '<div class="results">'
+        + '<div class="emoji-lg" style="font-size:44px;">'+(stars===3?'🏅':stars>=1?'🌟':'💪')+'</div>'
+        + '<div class="stars-anim">'+starsHTML(stars,true)+'</div>'
+        + '<p class="msg">'+az('答對')+' '+correct+' / '+total+' '+az('題')+' — '+msgs[stars]+'</p>'
+        + '<div class="btnrow">'
+        + '<button class="btn primary" id="retry-btn">'+az('再玩一次')+'</button>'
+        + '<button class="btn" id="home-btn">'+az('返回森林地圖')+'</button>'
+        + '</div></div>';
+      container.querySelector('#retry-btn').addEventListener('click', function(){ idx=0; correct=0; renderQuestion(); });
+      container.querySelector('#home-btn').addEventListener('click', closeStage);
+    }
+  }
+
+  window.__NF = { STAGES:STAGES, runQuiz:runQuiz, az:az, rand:rand, pick:pick, shuffle:shuffle, clamp:clamp,
+    distinctExtras:distinctExtras, NAMES:NAMES, renderHub:renderHub, closeStage:closeStage, computeStars:computeStars, starsHTML:starsHTML };
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var az=window.__NF.az, rand=window.__NF.rand, pick=window.__NF.pick, shuffle=window.__NF.shuffle,
+      clamp=window.__NF.clamp, distinctExtras=window.__NF.distinctExtras, runQuiz=window.__NF.runQuiz;
+
+  /* ---- 1. number blocks ---- */
+  function blocksHTML(n,cls){
+    var tens=Math.floor(n/10), ones=n%10;
+    var rods=''; for(var t=0;t<tens;t++) rods += '<div class="rod">'+'<span></span>'.repeat(10)+'</div>';
+    var onesHTML = ones>0 ? '<div class="onesgrp">'+'<span></span>'.repeat(ones)+'</div>' : '';
+    return '<div class="blocks '+(cls||'')+'">'+rods+onesHTML+'</div>';
+  }
+  function swapDigits(n){ var t=Math.floor(n/10), o=n%10; return o*10+t; }
+  function makeNumberBlocks(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var n = rand(2,99);
+      if(Math.random()<0.5){
+        var extras = distinctExtras(n,2,0,99,[
+          function(){ var s=swapDigits(n); return s===n? n+(Math.random()<0.5?1:-1) : s; },
+          function(){ return n + (Math.random()<0.5?10:-10); },
+        ]);
+        var choices = shuffle([n].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===n}; });
+        return { promptHTML: blocksHTML(n)+'<p class="q-text">'+az('積木一共是多少？')+'</p>', choices:choices };
+      } else {
+        var extras2 = distinctExtras(n,2,0,99,[
+          function(){ return n + (Math.random()<0.5?1:-1); },
+          function(){ return n + (Math.random()<0.5?10:-10); },
+        ]);
+        var choices2 = shuffle([n].concat(extras2)).map(function(v){ return {html:blocksHTML(v,'blocks-choice'), correct:v===n}; });
+        return { promptHTML: '<p class="q-text">'+az('哪一堆積木是「'+n+'」？')+'</p>', choices:choices2 };
+      }
+    });
+  }
+
+  /* ---- 2. place value ---- */
+  function makePlaceValue(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var n = rand(10,99), tens=Math.floor(n/10), ones=n%10;
+      var mode = rand(0,4);
+      if(mode===4){
+        var tGroups = rand(1,8);
+        var oGroups = rand(10,15);
+        var total5 = tGroups*10 + oGroups;
+        var naiveConcat = tGroups*10 + (oGroups%10);
+        var extras5 = distinctExtras(total5,2,10,150,[
+          function(){return naiveConcat;}, function(){return tGroups*10+oGroups+10;}, function(){return oGroups;}
+        ]);
+        var choices5 = shuffle([total5].concat(extras5)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===total5}; });
+        var qText5 = oGroups+'個一和'+tGroups+'個十合起來是多少？';
+        return { promptHTML:'<p class="q-text">'+az(qText5)+'</p>', choices:choices5 };
+      } else if(mode===0){
+        var extras = distinctExtras(tens,2,0,90,[ function(){return tens*10;}, function(){return ones;}, function(){return tens+1;}, function(){return tens-1;} ]);
+        var choices = shuffle([tens].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===tens}; });
+        return { promptHTML:'<div class="equation">'+n+'</div><p class="q-text">'+az('這個數字的十位是多少？')+'</p>', choices:choices };
+      } else if(mode===1){
+        var extras2 = distinctExtras(ones,2,0,9,[ function(){return tens;}, function(){return ones+1;}, function(){return ones-1;} ]);
+        var choices2 = shuffle([ones].concat(extras2)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===ones}; });
+        return { promptHTML:'<div class="equation">'+n+'</div><p class="q-text">'+az('這個數字的個位是多少？')+'</p>', choices:choices2 };
+      } else if(mode===2){
+        var swapped = ones*10+tens;
+        var extras3 = distinctExtras(n,2,0,99,[ function(){return swapped;}, function(){return n+10;}, function(){return n-10;} ]);
+        var choices3 = shuffle([n].concat(extras3)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===n}; });
+        return { promptHTML:'<p class="q-text">'+az('十位是 '+tens+'，個位是 '+ones+'，這個數字是多少？')+'</p>', choices:choices3 };
+      } else {
+        var digitPos = pick(['ones','tens']);
+        var target = rand(1,9);
+        var correctNum;
+        if(digitPos==='ones') correctNum = rand(1,9)*10 + target;
+        else correctNum = target*10 + rand(0,9);
+        var trapNum = digitPos==='ones' ? (target*10 + rand(0,9)) : (rand(1,9)*10 + target);
+        var extraPool = [];
+        var guard4=0;
+        while(extraPool.length<2 && guard4<30){
+          var v = rand(10,99);
+          var vOnes=v%10, vTens=Math.floor(v/10);
+          var matches = digitPos==='ones' ? vOnes===target : vTens===target;
+          if(!matches && v!==trapNum && extraPool.indexOf(v)===-1) extraPool.push(v);
+          guard4++;
+        }
+        var choices4 = shuffle([correctNum, trapNum].concat(extraPool)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===correctNum}; });
+        var qText = digitPos==='ones' ? '下面哪一個數的個位數字是 '+target+'？' : '下面哪一個數的十位數字是 '+target+'？';
+        return { promptHTML:'<p class="q-text">'+az(qText)+'</p>', choices:choices4 };
+      }
+    });
+  }
+
+  /* ---- 3. compare battle ---- */
+  var MONSTERS = ['🦖','🐙','🐲','🦄','🐵','🦁','🐯','🐼','🐹','🦊','🐨','🐺','🐷','🐰'];
+  function makeCompareBattle(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      if(Math.random()<0.35){
+        var labels4=['甲','乙','丙','丁'];
+        var nums4=[], guard6=0;
+        while(nums4.length<4 && guard6<40){
+          var v=rand(0,99);
+          if(nums4.indexOf(v)===-1) nums4.push(v);
+          guard6++;
+        }
+        while(nums4.length<4) nums4.push(rand(0,99));
+        var askMax = Math.random()<0.5;
+        var targetVal = askMax ? Math.max.apply(null,nums4) : Math.min.apply(null,nums4);
+        var targetIdx4 = nums4.indexOf(targetVal);
+        var promptHTML4 =
+          '<div class="side-by-side">'+labels4.map(function(l,i){
+            return '<div class="fighter"><span class="mface">'+az(l)+'</span><span class="num">'+nums4[i]+'</span></div>';
+          }).join('')+'</div>'
+          + '<p class="q-text">'+az('誰的數字最'+(askMax?'大':'小')+'？')+'</p>';
+        var choices4 = shuffle(labels4.map(function(l,i){ return {html:az(l), correct:i===targetIdx4}; }));
+        return { promptHTML:promptHTML4, choices:choices4 };
+      }
+      var x=rand(0,99), y=rand(0,99);
+      if(Math.random()<0.15) y=x; else if(x===y) y = y===99? y-1 : y+1;
+      var ms = shuffle(MONSTERS).slice(0,2), m1=ms[0], m2=ms[1];
+      var answer = x===y ? 'E' : (x>y?'L':'R');
+      var promptHTML =
+        '<div class="battle">'
+        + '<div class="fighter"><span class="mface">'+m1+'</span><span class="num">'+x+'</span></div>'
+        + '<div class="vs">VS</div>'
+        + '<div class="fighter"><span class="mface">'+m2+'</span><span class="num">'+y+'</span></div>'
+        + '</div><p class="q-text">'+az('哪一邊的數字比較大？')+'</p>';
+      var opts = [
+        {html:m1+' '+az('左邊比較大'), correct:answer==='L'},
+        {html:m2+' '+az('右邊比較大'), correct:answer==='R'},
+        {html:az('一樣大')+' =', correct:answer==='E'},
+      ];
+      return { promptHTML:promptHTML, choices: shuffle(opts) };
+    });
+  }
+
+  /* ---- 4. ordinal queue ---- */
+  var ORD = ['第一','第二','第三','第四','第五','第六','第七','第八','第九','第十'];
+  var ANIMAL_POOL = ['🐶','🐱','🐰','🐸','🐷','🐮','🐵','🐔','🐦','🦆','🐢','🦋','🐝','🐌'];
+  function queueHTML(animals){
+    return '<div class="queue">'+animals.map(function(a,i){ return '<div class="slot"><div class="a">'+a+'</div><div class="p">'+(i+1)+'</div></div>'; }).join('')+'<div class="trophy">🏆</div></div>';
+  }
+  function dirHintHTML(dir){
+    return '<p class="q-text" style="margin-top:14px;font-size:16px;">'+(dir==='L'? '👉 '+az('從左邊數來') : '👈 '+az('從右邊數來'))+'</p>';
+  }
+  function makeOrdinalQueue(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var n = rand(6,8);
+      var animals = shuffle(ANIMAL_POOL).slice(0,n);
+      var dir = pick(['L','R']);
+      // posAt(p) = visual index (0-based) of the animal at counted-position p, given direction
+      function posAt(p){ return dir==='L' ? p-1 : n-p; }
+      function orderOf(visualIdx){ return dir==='L' ? visualIdx+1 : n-visualIdx; }
+      var branch = rand(0,2);
+      if(branch===2){
+        var i1 = rand(0,n-2), i2 = rand(i1+1,n-1);
+        var p1 = i1+1, p2 = i2+1;
+        var between = p2-p1-1;
+        var extras = distinctExtras(between,2,0,n,[ function(){return p2-p1;}, function(){return between+1;}, function(){return between-1;} ]);
+        var choices = shuffle([between].concat(extras)).map(function(v){ return {html:v+' '+az('個'), correct:v===between}; });
+        var qtext = animals[i1]+az('排在第 '+p1+' 個，')+animals[i2]+az('排在第 '+p2+' 個，中間有幾個？');
+        return { promptHTML: queueHTML(animals)+'<p class="q-text">'+qtext+'</p>', choices:choices };
+      }
+      if(branch===0){
+        var pos = rand(1,n);
+        var correctAnimal = animals[posAt(pos)];
+        var distractors = shuffle(animals.filter(function(a){ return a!==correctAnimal; })).slice(0,2);
+        var choices = shuffle([correctAnimal].concat(distractors)).map(function(a){ return {html:'<span class="emoji-lg">'+a+'</span>', correct:a===correctAnimal}; });
+        return { promptHTML: queueHTML(animals)+dirHintHTML(dir)+'<p class="q-text">'+az('排隊的'+ORD[pos-1]+'個是誰？')+'</p>', choices:choices };
+      } else {
+        var visualIdx = rand(0,n-1);
+        var animal = animals[visualIdx];
+        var pos2 = orderOf(visualIdx);
+        var posSet = {}; posSet[pos2]=true;
+        while(Object.keys(posSet).length<3) posSet[rand(1,n)]=true;
+        var choices2 = shuffle(Object.keys(posSet).map(Number)).map(function(p){ return {html:az(ORD[p-1]), correct:p===pos2}; });
+        return { promptHTML: queueHTML(animals)+dirHintHTML(dir)+'<p class="q-text">'+animal+' '+az('排第幾個？')+'</p>', choices:choices2 };
+      }
+    });
+  }
+
+  window.__NF.STAGES.push(
+    {id:'numberBlocks', code:'NC-1-1-1 / 1-1-2', cat:'number', emoji:'🧱', title:'數字積木屋', desc:'認識100以內的數字', mk:makeNumberBlocks},
+    {id:'placeValue', code:'NC-1-1-2', cat:'number', emoji:'🔢', title:'位值大冒險', desc:'分辨十位和個位，還有幾包又幾張', mk:makePlaceValue},
+    {id:'compareBattle', code:'NC-1-1-3', cat:'number', emoji:'⚔️', title:'比大小對決', desc:'比比看誰的數字大', mk:makeCompareBattle},
+    {id:'ordinalQueue', code:'NC-1-1-4', cat:'number', emoji:'🏆', title:'排隊得獎盃', desc:'認識排隊的順序', mk:makeOrdinalQueue}
+  );
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var az=window.__NF.az, rand=window.__NF.rand, pick=window.__NF.pick, shuffle=window.__NF.shuffle,
+      clamp=window.__NF.clamp, distinctExtras=window.__NF.distinctExtras, runQuiz=window.__NF.runQuiz, NAMES=window.__NF.NAMES;
+
+  /* ---- 5. frog hop ---- */
+  function padsHTML(seq, blankIdx){
+    return '<div class="padrow">'+seq.map(function(v,i){
+      return '<div class="pad '+(i===blankIdx?'blank':'')+'">'+(i===0?'<span class="frog">🐸</span>':'')+(i===blankIdx?'?':v)+'</div>';
+    }).join('')+'</div>';
+  }
+  function makeFrogHop(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var kind = rand(0,3);
+      if(kind===0 || kind===1){
+        var step = pick([2,5,10]);
+        var count = 5;
+        var dir = kind===0 ? 1 : -1;
+        var seq;
+        if(dir===1){
+          var maxStart = Math.max(0, 100 - step*(count-1));
+          var start = rand(0, maxStart);
+          seq = []; for(var i=0;i<count;i++) seq.push(start+i*step);
+        } else {
+          var minStart = step*(count-1);
+          var start2 = rand(minStart, 100);
+          seq = []; for(var i=0;i<count;i++) seq.push(start2-i*step);
+        }
+        var blankIdx = rand(1,count-1);
+        var answer = seq[blankIdx];
+        var extras = distinctExtras(answer,2,0,120,[
+          function(){return answer+step;}, function(){return answer-step;}, function(){return answer+1;}, function(){return answer-1;}
+        ]);
+        var choices = shuffle([answer].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===answer}; });
+        var verb = dir===1 ? az('往前跳') : az('倒退跳');
+        return { promptHTML: padsHTML(seq,blankIdx)+'<p class="q-text">'+az('小青蛙每次')+verb+' '+step+az('，下一片荷葉的數字是幾？')+'</p>', choices:choices };
+      } else if(kind===2){
+        var a = pick([5,6,7,8,9]);
+        var bStart = rand(a>=8?a:5, 12);
+        var lines = [];
+        for(var i=0;i<3;i++) lines.push({b:bStart+i, sum:a+bStart+i});
+        var shownLines = lines.slice(0,2).map(function(l){ return a+' + '+l.b+' = '+l.sum; });
+        var answer2 = lines[2].sum;
+        var extras2 = distinctExtras(answer2,2,0,30,[ function(){return answer2+1;}, function(){return answer2-1;} ]);
+        var choices2 = shuffle([answer2].concat(extras2)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===answer2}; });
+        var promptHTML2 = '<div class="equation" style="font-size:22px;line-height:1.8;">'+shownLines.join('<br>')+'<br>'+a+' + '+lines[2].b+' = ?</div>';
+        return { promptHTML: promptHTML2+'<p class="q-text">'+az('找出規律，算算看下一個答案是多少？')+'</p>', choices:choices2 };
+      } else {
+        var groupSize = pick([2,5,10]);
+        var groupCount = rand(3,6);
+        var total3 = groupSize*groupCount;
+        var emoji = groupSize===2 ? '🍓' : (groupSize===5 ? '🎈' : '🪙');
+        var groupsHTML = '<div class="padrow" style="gap:16px;">'+Array.from({length:groupCount}, function(){
+          return '<div style="display:flex;gap:2px;flex-wrap:wrap;max-width:70px;">'+emoji.repeat(groupSize)+'</div>';
+        }).join('')+'</div>';
+        var extras3 = distinctExtras(total3,2,0,80,[ function(){return groupCount;}, function(){return total3+groupSize;}, function(){return total3-groupSize;} ]);
+        var choices3 = shuffle([total3].concat(extras3)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===total3}; });
+        return { promptHTML: groupsHTML+'<p class="q-text">'+az('一份有 '+groupSize+' 個，共有 '+groupCount+' 份，一共有幾個？')+'</p>', choices:choices3 };
+      }
+    });
+  }
+
+  /* ---- 6. math quest ---- */
+  function makeMathQuest(container, ctx){
+    runQuiz(container, ctx, 12, function(){
+      if(Math.random()<0.5){
+        var isAdd = Math.random()<0.5;
+        var a,b,answer,text;
+        if(isAdd){ a=rand(0,10); b=rand(0,10); answer=a+b; text=a+' + '+b+' = ?'; }
+        else { a=rand(0,20); b=rand(0,a); answer=a-b; text=a+' − '+b+' = ?'; }
+        var extras = distinctExtras(answer,2,0,30,[
+          function(){return answer+1;}, function(){return answer-1;}, function(){return answer+10;}, function(){return answer-10;},
+          function(){return isAdd? Math.abs(a-b): a+b;}
+        ]);
+        var choices = shuffle([answer].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===answer}; });
+        return { promptHTML: '<div class="equation">'+text+'</div>', choices:choices };
+      } else {
+        var isAdd2 = Math.random()<0.5;
+        var name = pick(NAMES);
+        var a2,b2,answer2,text2;
+        if(isAdd2){
+          a2=rand(5,50); b2=rand(1,49); answer2=a2+b2;
+          text2 = pick([
+            name+az('有')+a2+az('顆蘋果，又摘了')+b2+az('顆，現在一共有幾顆蘋果？'),
+            name+az('原本有')+a2+az('顆氣球，媽媽又買了')+b2+az('顆，現在共有幾顆氣球？'),
+          ]);
+        } else {
+          a2=rand(10,80); b2=rand(1,a2); answer2=a2-b2;
+          text2 = pick([
+            name+az('有')+a2+az('顆糖果，吃掉了')+b2+az('顆，還剩下幾顆？'),
+            az('書架上有')+a2+az('本書，借走了')+b2+az('本，還剩下幾本？'),
+          ]);
+        }
+        var extras2 = distinctExtras(answer2,2,0,140,[
+          function(){return answer2+1;}, function(){return answer2-1;}, function(){return answer2+10;}, function(){return answer2-10;},
+          function(){return isAdd2? Math.abs(a2-b2): a2+b2;}
+        ]);
+        var choices2 = shuffle([answer2].concat(extras2)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===answer2}; });
+        return { promptHTML: '<p class="q-text" style="margin-top:0;">'+text2+'</p>', choices:choices2 };
+      }
+    });
+  }
+
+  /* ---- addition commutative law ---- */
+  function makeAddComm(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var a = rand(2,60), b = rand(1,99-a);
+      var sum = a+b;
+      var name1 = pick(NAMES), name2 = pick(NAMES);
+      while(name2===name1) name2 = pick(NAMES);
+      var promptHTML =
+        '<p class="q-text" style="margin-top:0;">'+az(name1)+az('算出 ')+a+' + '+b+az(' = ')+sum+az('。')+'</p>'
+        + '<div class="equation" style="font-size:26px;">'+b+' + '+a+' = ?</div>'
+        + '<p class="q-text" style="margin-top:6px;font-size:15px;">'+az(name2)+az('不用重新算，也能馬上說出答案！')+'</p>';
+      var extras = distinctExtras(sum,3,0,140,[
+        function(){return sum+1;}, function(){return sum-1;}, function(){return Math.abs(a-b);}
+      ]);
+      var choices = shuffle([sum].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===sum}; });
+      return { promptHTML:promptHTML, choices:choices };
+    });
+  }
+
+  /* ---- 7. reading comprehension ---- */
+  function makeReading(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var kind = rand(0,6);
+      var name = pick(NAMES), name2 = pick(NAMES);
+      while(name2===name) name2 = pick(NAMES);
+      var text, answer, e1, e2, e3;
+      if(kind===0){
+        var a=rand(8,15), c=rand(2,9), b=rand(1,a-1);
+        answer = a-b;
+        text = name+az('的鉛筆盒裡有')+a+az('枝鉛筆和')+c+az('枝色筆。今天她借給同學')+b+az('枝鉛筆。請問，')+name+az('現在還有幾枝鉛筆？');
+        e1=c; e2=a+b; e3=a;
+      } else if(kind===1){
+        var bn=rand(6,12), cn=rand(1,bn-1), an=rand(4,10);
+        answer = bn-cn;
+        text = az('班上有')+an+az('個女生和')+bn+az('個男生，其中有')+cn+az('個男生請假沒來上課。請問，今天來上課的男生有幾個？');
+        e1=an; e2=bn+cn; e3=bn;
+      } else if(kind===2){
+        var fa=rand(2,6), fb=rand(1,5), fc=rand(1,5);
+        answer = fa+fb+fc;
+        text = az('魚缸裡原本有')+fa+az('條魚。媽媽又買了')+fb+az('條紅色的魚和')+fc+az('條黑色的魚，放進魚缸裡。請問，魚缸裡現在一共有幾條魚？');
+        e1=fa+fb; e2=fa+fc; e3=fb+fc;
+      } else if(kind===3){
+        var ma=rand(5,20), mb=rand(1,15);
+        answer = ma+mb;
+        text = name+az('原本有')+ma+az('元。爸爸又給了他')+mb+az('元當作獎勵。請問，')+name+az('現在一共有多少元？');
+        e1 = ma>mb ? ma-mb : ma+mb+1; e2=ma; e3=mb;
+      } else if(kind===4){
+        var da=rand(8,16), db=rand(1,da-1);
+        answer = da-db;
+        text = az('操場上有')+da+az('隻小狗在玩，牠們有的是黑色、有的是白色。過了一會兒，有')+db+az('隻小狗跑走了。請問，操場上還剩下幾隻小狗？');
+        e1=da+db; e2=da; e3=db;
+      } else if(kind===5){
+        var ga=rand(4,12), gb=rand(4,12);
+        answer = ga+gb;
+        text = name+az('有')+ga+az('顆彈珠，')+name2+az('有')+gb+az('顆彈珠。請問，兩人一共有幾顆彈珠？');
+        e1=Math.abs(ga-gb); e2=ga; e3=gb;
+      } else {
+        var sa=rand(6,16), sb=rand(1,sa-1);
+        answer = sa-sb;
+        text = name+az('有')+sa+az('張貼紙，')+name2+az('有')+sb+az('張貼紙。請問，')+name+az('比')+name2+az('多幾張貼紙？');
+        e1=sa+sb; e2=sa; e3=sb;
+      }
+      var extras = distinctExtras(answer,2,0,60,[ function(){return e1;}, function(){return e2;}, function(){return e3;} ]);
+      var choices = shuffle([answer].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===answer}; });
+      return { promptHTML: '<p class="q-text" style="text-align:left;line-height:2.1;margin-top:0;">'+text+'</p>', choices:choices };
+    });
+  }
+
+  window.__NF.STAGES.push(
+    {id:'frogHop', code:'NC-1-1-5', cat:'calc', emoji:'🐸', title:'青蛙跳跳數數', desc:'一數、倒數、找規律', mk:makeFrogHop},
+    {id:'addComm', code:'NC-1-3-1', cat:'calc', emoji:'🔄', title:'換個順序一樣多', desc:'加法交換律，不用重新算', mk:makeAddComm},
+    {id:'mathQuest', code:'NC-1-2 / 1-3', cat:'calc', emoji:'➕', title:'加減法闖關', desc:'用加法和減法算算看', mk:makeMathQuest},
+    {id:'readingQuest', code:'NC-1-2 閱讀應用', cat:'calc', emoji:'📖', title:'閱讀理解小偵探', desc:'讀故事，找出答案', mk:makeReading}
+  );
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var az=window.__NF.az, rand=window.__NF.rand, pick=window.__NF.pick, shuffle=window.__NF.shuffle,
+      starsHTML=window.__NF.starsHTML, computeStars=window.__NF.computeStars, closeStage=window.__NF.closeStage;
+
+  /* ---- 8. money shop (custom) ---- */
+  var SHOP_ITEMS = [
+    {em:'🍬', nm:'糖果', price:6}, {em:'📏', nm:'尺', price:10}, {em:'🎈', nm:'氣球', price:5},
+    {em:'🍞', nm:'麵包', price:20}, {em:'🧃', nm:'果汁', price:25}, {em:'🖍️', nm:'蠟筆', price:15},
+    {em:'📒', nm:'筆記本', price:65}, {em:'🧸', nm:'玩偶', price:90}, {em:'🍎', nm:'蘋果', price:8},
+    {em:'🚌', nm:'玩具巴士', price:55},
+  ];
+  var COINS = [1,5,10,50,100];
+  function makeMoneyShop(container, ctx){
+    var items = shuffle(SHOP_ITEMS).slice(0,8);
+    var total = items.length;
+    var idx=0, firstTryCorrect=0, payment=0, attemptedThisItem=false;
+    render();
+    function render(){
+      var item = items[idx];
+      var pct = Math.round((idx/total)*100);
+      payment=0; attemptedThisItem=false;
+      ctx.setProgress(idx+1,total,firstTryCorrect);
+      container.innerHTML =
+        '<div class="progressbar"><div class="fill" style="width:'+pct+'%"></div></div>'
+        + '<div class="shop">'
+        + '<div class="item-card"><div class="em">'+item.em+'</div><div class="nm">'+az(item.nm)+'</div><div class="pr">'+item.price+' '+az('元')+'</div></div>'
+        + '<p class="q-text" style="margin-top:0;">'+az('請拿出剛好的錢幣付款')+'</p>'
+        + '<div class="paytotal">'+az('目前拿了')+' <span id="pay-num">0</span> '+az('元')+'</div>'
+        + '<div class="coin-tray">'+COINS.map(function(c){ return '<button class="coin" data-c="'+c+'">'+c+az('元')+'</button>'; }).join('')+'</div>'
+        + '<div class="shop-actions"><button class="btn" id="reset-btn">'+az('清空重來')+'</button><button class="btn primary" id="pay-btn">'+az('付錢')+'</button></div>'
+        + '<div class="shop-msg"></div>'
+        + '</div>';
+      container.querySelectorAll('.coin').forEach(function(c){
+        c.addEventListener('click', function(){
+          payment += parseInt(c.dataset.c,10);
+          container.querySelector('#pay-num').textContent = payment;
+        });
+      });
+      container.querySelector('#reset-btn').addEventListener('click', function(){
+        payment=0; container.querySelector('#pay-num').textContent = 0;
+        container.querySelector('.shop-msg').textContent = '';
+      });
+      container.querySelector('#pay-btn').addEventListener('click', function(){
+        var msg = container.querySelector('.shop-msg');
+        if(payment === item.price){
+          if(!attemptedThisItem) firstTryCorrect++;
+          msg.style.color = 'var(--right)';
+          msg.innerHTML = az('剛剛好！老闆謝謝你 🎉');
+          setTimeout(function(){ idx++; if(idx<total) render(); else showResults(); }, 750);
+        } else {
+          attemptedThisItem = true;
+          msg.style.color = 'var(--wrong)';
+          msg.innerHTML = payment>item.price ? az('拿太多囉，清空再試一次') : az('還不夠喔，再加一點');
+        }
+      });
+    }
+    function showResults(){
+      var stars = computeStars(firstTryCorrect,total);
+      ctx.finish(stars,firstTryCorrect,total);
+      var msgs = [az('多練習幾次，你會越來越厲害！'), az('已經會付錢了，繼續加油！'), az('很厲害，大部分都一次就對！'), az('太厲害了，你是購物小達人！')];
+      container.innerHTML =
+        '<div class="results"><div class="emoji-lg" style="font-size:44px;">🛍️</div>'
+        + '<div class="stars-anim">'+starsHTML(stars,true)+'</div>'
+        + '<p class="msg">'+az('一次成功')+' '+firstTryCorrect+' / '+total+' '+az('次')+' — '+msgs[stars]+'</p>'
+        + '<div class="btnrow"><button class="btn primary" id="retry-btn">'+az('再玩一次')+'</button><button class="btn" id="home-btn">'+az('返回森林地圖')+'</button></div></div>';
+      container.querySelector('#retry-btn').addEventListener('click', function(){ makeMoneyShop(container, ctx); });
+      container.querySelector('#home-btn').addEventListener('click', closeStage);
+    }
+  }
+
+  window.__NF.STAGES.push(
+    {id:'moneyShop', code:'NC-1-4-1', cat:'time', emoji:'🛒', title:'小商店買東西', desc:'認識錢幣，練習付錢', mk:makeMoneyShop}
+  );
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var az=window.__NF.az, rand=window.__NF.rand, pick=window.__NF.pick, shuffle=window.__NF.shuffle,
+      distinctExtras=window.__NF.distinctExtras, runQuiz=window.__NF.runQuiz;
+
+  /* ---- 9. clock fairy ---- */
+  function clockSVG(hour,minute){
+    var hourAngle = ((hour%12) + minute/60) * 30;
+    var minuteAngle = minute * 6;
+    var numbers='';
+    for(var i=1;i<=12;i++){
+      var ang = (i*30-90) * Math.PI/180;
+      var x = 60+Math.cos(ang)*44, y = 60+Math.sin(ang)*44;
+      numbers += '<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="10" style="fill:var(--ink);font-family:\'Baloo 2\',sans-serif;font-weight:700;">'+i+'</text>';
+    }
+    var hx = 60+Math.cos((hourAngle-90)*Math.PI/180)*24, hy = 60+Math.sin((hourAngle-90)*Math.PI/180)*24;
+    var mx = 60+Math.cos((minuteAngle-90)*Math.PI/180)*40, my = 60+Math.sin((minuteAngle-90)*Math.PI/180)*40;
+    return '<svg viewBox="0 0 120 120" width="120" height="120">'
+      + '<circle cx="60" cy="60" r="56" style="fill:var(--card);stroke:var(--card-border);" stroke-width="3"/>'
+      + numbers
+      + '<line x1="60" y1="60" x2="'+hx+'" y2="'+hy+'" style="stroke:var(--ink);" stroke-width="5" stroke-linecap="round"/>'
+      + '<line x1="60" y1="60" x2="'+mx+'" y2="'+my+'" style="stroke:var(--accent);" stroke-width="3" stroke-linecap="round"/>'
+      + '<circle cx="60" cy="60" r="4" style="fill:var(--ink);"/></svg>';
+  }
+  function timeLabel(h,m){ return m===0? az(h+'點整') : az(h+'點30分'); }
+  function makeClockFairy(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var hour=rand(1,12), minute=pick([0,30]);
+      if(Math.random()<0.5){
+        var used = {}; used[hour+'-'+minute]=true;
+        var extras=[], guard=0;
+        while(extras.length<2 && guard<30){
+          var h2=rand(1,12), m2=pick([0,30]), k=h2+'-'+m2;
+          if(!used[k]){ used[k]=true; extras.push({h:h2,m:m2}); }
+          guard++;
+        }
+        var opts = shuffle([{h:hour,m:minute}].concat(extras)).map(function(o){ return {html:timeLabel(o.h,o.m), correct:o.h===hour&&o.m===minute}; });
+        return { promptHTML: '<div>'+clockSVG(hour,minute)+'</div><p class="q-text">'+az('現在是幾點？')+'</p>', choices: opts };
+      } else {
+        var used2 = {}; used2[hour+'-'+minute]=true;
+        var extras2=[], guard2=0;
+        while(extras2.length<2 && guard2<30){
+          var h3=rand(1,12), m3=pick([0,30]), k2=h3+'-'+m3;
+          if(!used2[k2]){ used2[k2]=true; extras2.push({h:h3,m:m3}); }
+          guard2++;
+        }
+        var opts2 = shuffle([{h:hour,m:minute}].concat(extras2)).map(function(o){ return {html:clockSVG(o.h,o.m), correct:o.h===hour&&o.m===minute}; });
+        return { promptHTML: '<p class="q-text" style="margin-top:0;">'+az('請找出「')+timeLabel(hour,minute)+az('」的鐘面')+'</p>', choices: opts2 };
+      }
+    });
+  }
+
+  /* ---- 10. calendar hunt ---- */
+  var WD = ['日','一','二','三','四','五','六'];
+  function buildCalendar(){
+    var year = pick([2025,2026]);
+    var month = rand(1,12);
+    var first = new Date(year, month-1, 1);
+    var startWeekday = first.getDay();
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var days = [];
+    for(var d=1; d<=daysInMonth; d++) days.push({date:d, weekday:new Date(year,month-1,d).getDay()});
+    return {year:year, month:month, startWeekday:startWeekday, daysInMonth:daysInMonth, days:days};
+  }
+  function calendarHTML(cal, highlightDate){
+    var totalCells = cal.startWeekday + cal.daysInMonth;
+    var rows = Math.ceil(totalCells/7);
+    var body = '', cellIndex = 0;
+    for(var r=0;r<rows;r++){
+      body += '<tr>';
+      for(var c=0;c<7;c++){
+        if(cellIndex<cal.startWeekday || cellIndex>=cal.startWeekday+cal.daysInMonth){
+          body += '<td></td>';
+        } else {
+          var date = cellIndex - cal.startWeekday + 1;
+          var hl = date===highlightDate ? 'style="background:var(--accent);color:#fff;"' : '';
+          body += '<td '+hl+'>'+date+'</td>';
+        }
+        cellIndex++;
+      }
+      body += '</tr>';
+    }
+    return '<table class="cal"><tr>'+WD.map(function(w){ return '<th>'+az('星期')+w+'</th>'; }).join('')+'</tr>'+body+'</table>'
+      + '<p style="text-align:center;font-size:12px;color:var(--ink-soft);">'+cal.year+' '+az('年')+' '+cal.month+' '+az('月')+'</p>';
+  }
+  function makeCalendarHunt(container, ctx){
+    var cal = buildCalendar();
+    runQuiz(container, ctx, 8, function(){
+      var type = rand(0,2);
+      if(type===0){
+        var d = pick(cal.days);
+        var answer = WD[d.weekday];
+        var extras = shuffle(WD.filter(function(w){ return w!==answer; })).slice(0,2);
+        var choices = shuffle([answer].concat(extras)).map(function(w){ return {html:az('星期'+w), correct:w===answer}; });
+        return { promptHTML: calendarHTML(cal,d.date)+'<p class="q-text">'+cal.month+az('月')+d.date+az('日是星期幾？')+'</p>', choices:choices };
+      } else if(type===1){
+        var wIdx = rand(1,6);
+        var count = cal.days.filter(function(dd){ return dd.weekday===wIdx; }).length;
+        var extras2 = distinctExtras(count,2,2,6,[ function(){return count+1;}, function(){return count-1;} ]);
+        var choices2 = shuffle([count].concat(extras2)).map(function(v){ return {html:v+' '+az('天'), correct:v===count}; });
+        return { promptHTML: calendarHTML(cal)+'<p class="q-text">'+cal.month+az('月的星期')+WD[wIdx]+az('一共有幾天？')+'</p>', choices:choices2 };
+      } else {
+        var d2 = rand(1,cal.daysInMonth-1);
+        var answer2 = d2+1;
+        var extras3 = distinctExtras(answer2,2,1,cal.daysInMonth,[ function(){return d2-1;}, function(){return d2+2;} ]);
+        var choices3 = shuffle([answer2].concat(extras3)).map(function(v){ return {html:cal.month+az('月')+v+az('日'), correct:v===answer2}; });
+        return { promptHTML: calendarHTML(cal,d2)+'<p class="q-text">'+cal.month+az('月')+d2+az('日的隔天是幾月幾日？')+'</p>', choices:choices3 };
+      }
+    });
+  }
+
+  /* ---- daily time of day ---- */
+  var ACTIVITIES = [
+    {label:'吃早餐', period:'上午', hour:7},
+    {label:'上學', period:'上午', hour:8},
+    {label:'吃午餐', period:'中午', hour:12},
+    {label:'吃晚餐', period:'晚上', hour:6},
+    {label:'睡覺', period:'晚上', hour:9},
+    {label:'看國慶煙火', period:'晚上', hour:8},
+    {label:'到學校運動', period:'上午', hour:9},
+    {label:'放學回家', period:'下午', hour:4},
+  ];
+  function makeDailyTime(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      var act = pick(ACTIVITIES);
+      if(Math.random()<0.5){
+        var correctLabel = act.period+act.hour+'點';
+        var wrongPeriods = ['上午','中午','下午','晚上'].filter(function(p){ return p!==act.period; });
+        var opt2 = pick(shuffle(wrongPeriods))+act.hour+'點';
+        var opt3 = act.period+((act.hour%12)+1)+'點';
+        var opt4 = pick(shuffle(wrongPeriods))+((act.hour%12)+1)+'點';
+        var choices = shuffle([
+          {html:az(correctLabel), correct:true},
+          {html:az(opt2), correct:false},
+          {html:az(opt3), correct:false},
+          {html:az(opt4), correct:false},
+        ]);
+        return { promptHTML: '<p class="q-text" style="margin-top:0;">'+az('下面哪一個時刻最有可能'+act.label+'？')+'</p>', choices:choices };
+      } else {
+        var otherPeriods = ['上午','中午','下午','晚上'].filter(function(p){ return p!==act.period; });
+        var opts = shuffle([act.period].concat(shuffle(otherPeriods).slice(0,2)));
+        var choices2 = opts.map(function(p){ return {html:az(p), correct:p===act.period}; });
+        return { promptHTML: '<p class="q-text" style="margin-top:0;">'+az(act.label+'的時刻是（')+act.hour+az('點鐘），最有可能是：')+'</p>', choices:choices2 };
+      }
+    });
+  }
+
+  window.__NF.STAGES.push(
+    {id:'clockFairy', code:'NC-1-6-1,3', cat:'time', emoji:'🕐', title:'時鐘小精靈', desc:'看懂整點和半點', mk:makeClockFairy},
+    {id:'dailyTime', code:'NC-1-6-1', cat:'time', emoji:'🌇', title:'一天的時刻', desc:'上午、中午還是晚上？幾點最合理？', mk:makeDailyTime},
+    {id:'calendarHunt', code:'NC-1-6-2', cat:'time', emoji:'📅', title:'日曆尋寶', desc:'看懂日曆上的日期', mk:makeCalendarHunt}
+  );
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var az=window.__NF.az, rand=window.__NF.rand, pick=window.__NF.pick, shuffle=window.__NF.shuffle,
+      distinctExtras=window.__NF.distinctExtras, runQuiz=window.__NF.runQuiz, renderHub=window.__NF.renderHub;
+
+  /* ---- 11. counting cubes (stacking towers) ---- */
+  function towerHTML(heights){
+    return '<div class="towers-row">'+heights.map(function(h){
+      var cubes=''; for(var i=0;i<h;i++) cubes += '<div class="voxel"></div>';
+      return '<div class="tower">'+cubes+'</div>';
+    }).join('')+'</div>';
+  }
+  function towerSum(heights){ return heights.reduce(function(a,b){return a+b;},0); }
+  function randomTowers(colCount){
+    var h=[]; for(var i=0;i<colCount;i++) h.push(rand(1,4));
+    return h;
+  }
+  function makeCubes(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      if(Math.random()<0.55){
+        var cols = rand(3,5);
+        var heights = randomTowers(cols);
+        var total = towerSum(heights);
+        var maxH = Math.max.apply(null, heights);
+        var extras = distinctExtras(total,2,cols,4*cols,[ function(){return maxH;}, function(){return cols;}, function(){return total+1;}, function(){return total-1;} ]);
+        var choices = shuffle([total].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===total}; });
+        return { promptHTML: towerHTML(heights)+'<p class="q-text">'+az('一共用了幾個積木堆成的？')+'</p>', choices:choices };
+      } else {
+        var colsA = rand(2,3), colsB = rand(2,3);
+        var hA = randomTowers(colsA), hB = randomTowers(colsB);
+        var totalA = towerSum(hA), totalB = towerSum(hB);
+        var guard=0;
+        while(totalA===totalB && guard<20){ hB = randomTowers(colsB); totalB = towerSum(hB); guard++; }
+        var promptHTML =
+          '<div class="side-by-side">'
+          + '<div class="unit-row"><span class="lbl">'+az('左邊')+'</span>'+towerHTML(hA)+'</div>'
+          + '<div class="unit-row"><span class="lbl">'+az('右邊')+'</span>'+towerHTML(hB)+'</div>'
+          + '</div><p class="q-text">'+az('哪一疊用的積木比較多？')+'</p>';
+        var choices2 = shuffle([
+          {html:az('左邊'), correct:totalA>totalB},
+          {html:az('右邊'), correct:totalB>totalA},
+        ]);
+        return { promptHTML:promptHTML, choices:choices2 };
+      }
+    });
+  }
+
+  /* ---- 12. length compare ---- */
+  function rulerBar(units, color){
+    var cells=''; for(var i=0;i<units;i++) cells += '<span class="cell"></span>';
+    return '<div class="measure-stack"><div class="mbar" style="width:'+(units*24)+'px;background:'+color+';"></div><div class="ruler" style="width:'+(units*24)+'px;">'+cells+'</div></div>';
+  }
+  function makeLengthCompare(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      if(Math.random()<0.5){
+        var wA=rand(50,220), wB=rand(50,220);
+        while(Math.abs(wA-wB)<24) wB=rand(50,220);
+        var promptHTML =
+          '<div class="bars">'
+          + '<div class="bar-row"><span class="lbl">'+az('緞帶')+' A</span><div class="bar" style="width:'+wA+'px;"></div></div>'
+          + '<div class="bar-row"><span class="lbl">'+az('緞帶')+' B</span><div class="bar" style="width:'+wB+'px;background:var(--gold);"></div></div>'
+          + '</div><p class="q-text">'+az('哪一條緞帶比較長？')+'</p>';
+        var choices = shuffle([
+          {html:az('緞帶')+' A', correct:wA>wB},
+          {html:az('緞帶')+' B', correct:wB>wA},
+        ]);
+        return { promptHTML:promptHTML, choices:choices };
+      } else {
+        var uA=rand(3,10), uB=rand(3,10);
+        while(uA===uB) uB=rand(3,10);
+        var picture2 =
+          '<div class="bars">'
+          + '<div class="unit-row"><span class="lbl">'+az('鉛筆')+' A</span>'+rulerBar(uA,'var(--accent2)')+'</div>'
+          + '<div class="unit-row"><span class="lbl">'+az('鉛筆')+' B</span>'+rulerBar(uB,'var(--gold)')+'</div>'
+          + '</div>';
+        if(Math.random()<0.5){
+          var choices2 = shuffle([
+            {html:az('鉛筆')+' A', correct:uA>uB},
+            {html:az('鉛筆')+' B', correct:uB>uA},
+          ]);
+          return { promptHTML: picture2+'<p class="q-text">'+az('哪一枝鉛筆比較長？')+'</p>', choices:choices2 };
+        } else {
+          var diffU = Math.abs(uA-uB);
+          var extrasU = distinctExtras(diffU,2,1,10,[ function(){return diffU+1;}, function(){return diffU-1;} ]);
+          var choicesU = shuffle([diffU].concat(extrasU)).map(function(v){ return {html:v+' '+az('個'), correct:v===diffU}; });
+          var longName = uA>uB ? az('鉛筆')+' A' : az('鉛筆')+' B';
+          return { promptHTML: picture2+'<p class="q-text">'+longName+az('比另一枝長幾個？')+'</p>', choices:choicesU };
+        }
+      }
+    });
+  }
+
+  /* ---- 13. route length: straight vs bent path between the same two points ---- */
+  function buildRoutePair(){
+    var straightLen = rand(3,6);
+    var d = rand(1,2);
+    var a = rand(1, Math.max(1, straightLen-1));
+    var rem = straightLen - a;
+    var b = rand(0, rem);
+    var c = rem - b;
+    var R = {dx:1,dy:0}, D = {dx:0,dy:1}, U = {dx:0,dy:-1};
+    var straightMoves = []; for(var i=0;i<straightLen;i++) straightMoves.push(R);
+    var bentMoves = [];
+    for(var i=0;i<a;i++) bentMoves.push(R);
+    for(var i=0;i<d;i++) bentMoves.push(D);
+    for(var i=0;i<b;i++) bentMoves.push(R);
+    for(var i=0;i<d;i++) bentMoves.push(U);
+    for(var i=0;i<c;i++) bentMoves.push(R);
+    return { straightLen:straightLen, bentLen:straightLen+2*d, straightMoves:straightMoves, bentMoves:bentMoves };
+  }
+  function routeSVG(moves, color){
+    var unit=32, x=0,y=0, pts=[[0,0]];
+    moves.forEach(function(m){ x+=m.dx; y+=m.dy; pts.push([x,y]); });
+    var xs=pts.map(function(p){return p[0];}), ys=pts.map(function(p){return p[1];});
+    var minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+    var minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
+    var pad=0.8;
+    var vbX=(minX-pad)*unit, vbY=(minY-pad)*unit, vbW=(maxX-minX+2*pad)*unit, vbH=(maxY-minY+2*pad)*unit;
+    var polyPts = pts.map(function(p){ return (p[0]*unit)+','+(p[1]*unit); }).join(' ');
+    var sx=pts[0][0]*unit, sy=pts[0][1]*unit;
+    var ex=pts[pts.length-1][0]*unit, ey=pts[pts.length-1][1]*unit;
+    var grid='';
+    var gx0 = Math.floor(vbX/unit)*unit, gy0 = Math.floor(vbY/unit)*unit;
+    for(var gx=gx0; gx<=vbX+vbW+0.01; gx+=unit) grid += '<line x1="'+gx+'" y1="'+vbY+'" x2="'+gx+'" y2="'+(vbY+vbH)+'" style="stroke:var(--card-border);" stroke-width="1"/>';
+    for(var gy=gy0; gy<=vbY+vbH+0.01; gy+=unit) grid += '<line x1="'+vbX+'" y1="'+gy+'" x2="'+(vbX+vbW)+'" y2="'+gy+'" style="stroke:var(--card-border);" stroke-width="1"/>';
+    var dots = pts.map(function(p){ return '<circle cx="'+(p[0]*unit)+'" cy="'+(p[1]*unit)+'" r="4" style="fill:'+color+';"/>'; }).join('');
+    return '<svg viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" width="100%" height="'+Math.max(70,vbH)+'" style="max-width:280px;display:block;margin:0 auto;">'
+      + grid
+      + '<polyline points="'+polyPts+'" fill="none" style="stroke:'+color+';" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'
+      + dots
+      + '<text x="'+sx+'" y="'+(sy-12)+'" font-size="20" text-anchor="middle">🚩</text>'
+      + '<text x="'+ex+'" y="'+(ey-12)+'" font-size="20" text-anchor="middle">🏁</text>'
+      + '</svg>';
+  }
+  function buildOneRoute(){
+    var R={dx:1,dy:0}, D={dx:0,dy:1}, U={dx:0,dy:-1};
+    if(Math.random()<0.45){
+      var len = rand(3,9);
+      var mv=[]; for(var i=0;i<len;i++) mv.push(R);
+      return mv;
+    }
+    var sl=rand(2,5), dd=rand(1,2);
+    var aa=rand(1,Math.max(1,sl-1)), remr=sl-aa, bb=rand(0,remr), cc=remr-bb;
+    var mv2=[];
+    for(var i=0;i<aa;i++) mv2.push(R);
+    for(var i=0;i<dd;i++) mv2.push(D);
+    for(var i=0;i<bb;i++) mv2.push(R);
+    for(var i=0;i<dd;i++) mv2.push(U);
+    for(var i=0;i<cc;i++) mv2.push(R);
+    return mv2;
+  }
+  function makeRouteLength(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      if(rand(0,3)===3){
+        var labels=['甲','乙','丙'];
+        var routes=[], guard5=0;
+        while(routes.length<3 && guard5<40){
+          var mv = buildOneRoute();
+          if(routes.every(function(r){ return r.length!==mv.length; })) routes.push(mv);
+          guard5++;
+        }
+        while(routes.length<3) routes.push(buildOneRoute());
+        var lens = routes.map(function(r){ return r.length; });
+        var colors=['var(--accent2)','var(--gold)','#c96bd8'];
+        var picture3 = '<div class="side-by-side">'+routes.map(function(r,i){
+          return '<div class="unit-row"><span class="lbl">'+az(labels[i])+'</span>'+routeSVG(r,colors[i])+'</div>';
+        }).join('')+'</div>';
+        var askShort = Math.random()<0.5;
+        var targetIdx = askShort ? lens.indexOf(Math.min.apply(null,lens)) : lens.indexOf(Math.max.apply(null,lens));
+        var choices5 = shuffle(labels.map(function(l,i){ return {html:az(l), correct:i===targetIdx}; }));
+        return { promptHTML: picture3+'<p class="q-text">'+az('哪一條路線'+(askShort?'最短':'最長')+'？')+'</p>', choices:choices5 };
+      }
+      var pair = buildRoutePair();
+      var swap = Math.random()<0.5;
+      var routeA = swap ? pair.bentMoves : pair.straightMoves;
+      var routeB = swap ? pair.straightMoves : pair.bentMoves;
+      var lenA = routeA.length, lenB = routeB.length;
+      var bentIsA = swap;
+      var picture =
+        '<div class="side-by-side">'
+        + '<div class="unit-row"><span class="lbl">'+az('路線')+'A</span>'+routeSVG(routeA,'var(--accent2)')+'</div>'
+        + '<div class="unit-row"><span class="lbl">'+az('路線')+'B</span>'+routeSVG(routeB,'var(--gold)')+'</div>'
+        + '</div>';
+      var kind = rand(0,2);
+      if(kind===0){
+        var choices = shuffle([
+          {html:az('路線')+'A', correct:lenA>lenB},
+          {html:az('路線')+'B', correct:lenB>lenA},
+        ]);
+        return { promptHTML: picture+'<p class="q-text">'+az('哪一條路線比較長？')+'</p>', choices:choices };
+      } else if(kind===1){
+        var diff = Math.abs(lenA-lenB);
+        var extras = distinctExtras(diff,2,1,10,[ function(){return diff+1;}, function(){return diff-1;} ]);
+        var choices2 = shuffle([diff].concat(extras)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===diff}; });
+        return { promptHTML: picture+'<p class="q-text">'+az('兩條路線差了幾格？')+'</p>', choices:choices2 };
+      } else {
+        var bentLen = bentIsA ? lenA : lenB;
+        var straightLen2 = bentIsA ? lenB : lenA;
+        var extras2 = distinctExtras(bentLen,2,1,12,[ function(){return straightLen2;}, function(){return bentLen+1;}, function(){return bentLen-1;} ]);
+        var choices3 = shuffle([bentLen].concat(extras2)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===bentLen}; });
+        return { promptHTML: picture+'<p class="q-text">'+az('彎彎曲曲的路線，一共走了幾格？')+'</p>', choices:choices3 };
+      }
+    });
+  }
+
+  /* ---- 14. block move (spot the moved block) ---- */
+  function genPolyomino(n){
+    var cells=[{r:0,c:0}], occ={'0,0':true}, guard=0;
+    var dirs=[{dr:-1,dc:0},{dr:1,dc:0},{dr:0,dc:-1},{dr:0,dc:1}];
+    while(cells.length<n && guard<300){
+      var base = pick(cells);
+      var d = pick(dirs);
+      var nr=base.r+d.dr, nc=base.c+d.dc, key=nr+','+nc;
+      if(!occ[key]){ cells.push({r:nr,c:nc}); occ[key]=true; }
+      guard++;
+    }
+    return cells;
+  }
+  function findMoveTarget(all, moved){
+    var remaining = all.filter(function(c){ return c!==moved; });
+    var occ={}; remaining.forEach(function(c){ occ[c.r+','+c.c]=true; });
+    var dirs=[{dr:-1,dc:0},{dr:1,dc:0},{dr:0,dc:-1},{dr:0,dc:1}];
+    var candidates=[];
+    remaining.forEach(function(c){
+      dirs.forEach(function(d){
+        var nr=c.r+d.dr, nc=c.c+d.dc, key=nr+','+nc;
+        if(!occ[key] && !(nr===moved.r&&nc===moved.c) && candidates.every(function(x){ return x.r!==nr||x.c!==nc; })){
+          candidates.push({r:nr,c:nc});
+        }
+      });
+    });
+    return candidates.length ? pick(candidates) : null;
+  }
+  function renderBlockGrid(cells){
+    var rs=cells.map(function(c){return c.r;}), cs=cells.map(function(c){return c.c;});
+    var minR=Math.min.apply(null,rs), minC=Math.min.apply(null,cs);
+    var maxR=Math.max.apply(null,rs), maxC=Math.max.apply(null,cs);
+    var px=34;
+    var w=(maxC-minC+1)*px, h=(maxR-minR+1)*px;
+    var html = cells.map(function(c){
+      var x=(c.c-minC)*px, y=(c.r-minR)*px;
+      return '<div class="blk" style="left:'+x+'px;top:'+y+'px;width:'+(px-4)+'px;height:'+(px-4)+'px;">'+c.n+'</div>';
+    }).join('');
+    return '<div class="blk-grid" style="width:'+w+'px;height:'+h+'px;">'+html+'</div>';
+  }
+  function makeBlockMove(container, ctx){
+    runQuiz(container, ctx, 8, function(){
+      var n = rand(5,7);
+      var all, moved, target, guard=0;
+      do {
+        var cells = genPolyomino(n);
+        var nums = shuffle(Array.from({length:cells.length}, function(_,i){ return i+1; }));
+        all = cells.map(function(c,i){ return {r:c.r,c:c.c,n:nums[i]}; });
+        moved = pick(all);
+        target = findMoveTarget(all, moved);
+        guard++;
+      } while(!target && guard<25);
+      var afterAll = all.map(function(c){ return c===moved ? {r:target.r,c:target.c,n:c.n} : {r:c.r,c:c.c,n:c.n}; });
+      var distractors = shuffle(all.map(function(c){return c.n;}).filter(function(v){ return v!==moved.n; })).slice(0,3);
+      var choices = shuffle([moved.n].concat(distractors)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===moved.n}; });
+      var picture =
+        '<div class="side-by-side" style="align-items:center;">'
+        + '<div class="unit-row">'+renderBlockGrid(all)+'</div>'
+        + '<div style="font-size:26px;">➡️</div>'
+        + '<div class="unit-row">'+renderBlockGrid(afterAll)+'</div>'
+        + '</div>';
+      return { promptHTML: picture+'<p class="q-text">'+az('哪一號積木被移動了？')+'</p>', choices:choices };
+    });
+  }
+
+  /* ---- shape move (flat tile version) ---- */
+  function renderShapeGrid(cells){
+    var rs=cells.map(function(c){return c.r;}), cs=cells.map(function(c){return c.c;});
+    var minR=Math.min.apply(null,rs), minC=Math.min.apply(null,cs);
+    var maxR=Math.max.apply(null,rs), maxC=Math.max.apply(null,cs);
+    var px=34;
+    var w=(maxC-minC+1)*px, h=(maxR-minR+1)*px;
+    var html = cells.map(function(c){
+      var x=(c.c-minC)*px, y=(c.r-minR)*px;
+      var tri = ((c.r+c.c)%2===0) ? 'polygon(0 0,100% 0,0 100%)' : 'polygon(100% 0,100% 100%,0 100%)';
+      return '<div class="tri" style="left:'+x+'px;top:'+y+'px;width:'+(px-2)+'px;height:'+(px-2)+'px;clip-path:'+tri+';"><span>'+c.n+'</span></div>';
+    }).join('');
+    return '<div class="blk-grid" style="width:'+w+'px;height:'+h+'px;">'+html+'</div>';
+  }
+  function makeShapeMove(container, ctx){
+    runQuiz(container, ctx, 8, function(){
+      var n = rand(5,7);
+      var all, moved, target, guard=0;
+      do {
+        var cells = genPolyomino(n);
+        var nums = shuffle(Array.from({length:cells.length}, function(_,i){ return i+1; }));
+        all = cells.map(function(c,i){ return {r:c.r,c:c.c,n:nums[i]}; });
+        moved = pick(all);
+        target = findMoveTarget(all, moved);
+        guard++;
+      } while(!target && guard<25);
+      var afterAll = all.map(function(c){ return c===moved ? {r:target.r,c:target.c,n:c.n} : {r:c.r,c:c.c,n:c.n}; });
+      var distractors = shuffle(all.map(function(c){return c.n;}).filter(function(v){ return v!==moved.n; })).slice(0,3);
+      var choices = shuffle([moved.n].concat(distractors)).map(function(v){ return {html:'<span class="num">'+v+'</span>', correct:v===moved.n}; });
+      var picture =
+        '<div class="side-by-side" style="align-items:center;">'
+        + '<div class="unit-row">'+renderShapeGrid(all)+'</div>'
+        + '<div style="font-size:26px;">➡️</div>'
+        + '<div class="unit-row">'+renderShapeGrid(afterAll)+'</div>'
+        + '</div>';
+      return { promptHTML: picture+'<p class="q-text">'+az('哪一號圖形板被移動了？')+'</p>', choices:choices };
+    });
+  }
+
+  /* ---- height compare (transitive reasoning + baseline trick) ---- */
+  var HEIGHT_NAMES = ['小芳','小玉','小智','小葵','小新','阿光','丁丁','小華'];
+  function personBar(boxH, bodyH, color){
+    return '<div style="display:flex;flex-direction:column;align-items:center;">'
+      + '<div style="width:26px;height:'+bodyH+'px;background:'+color+';border-radius:6px 6px 0 0;"></div>'
+      + '<div style="width:36px;height:'+boxH+'px;background:#b98a54;border-radius:0 0 4px 4px;"></div>'
+      + '</div>';
+  }
+  function makeHeightCompare(container, ctx){
+    runQuiz(container, ctx, 10, function(){
+      if(Math.random()<0.5){
+        var names3 = shuffle(HEIGHT_NAMES).slice(0,3);
+        var bodyHs = [rand(40,60), rand(40,60), rand(40,60)];
+        while(new Set(bodyHs).size<3){ bodyHs = [rand(40,60), rand(40,60), rand(40,60)]; }
+        var boxHs = shuffle([rand(0,20), rand(0,20), rand(0,20)]);
+        var colors = ['var(--accent2)','var(--gold)','#c96bd8'];
+        var picture =
+          '<div class="side-by-side">'+names3.map(function(nm,i){
+            return '<div class="unit-row"><span class="lbl">'+az(nm)+'</span>'+personBar(boxHs[i], bodyHs[i], colors[i])+'</div>';
+          }).join('')+'</div>';
+        var askShort = Math.random()<0.5;
+        var targetIdx = askShort ? bodyHs.indexOf(Math.min.apply(null,bodyHs)) : bodyHs.indexOf(Math.max.apply(null,bodyHs));
+        var choices = shuffle(names3.map(function(nm,i){ return {html:az(nm), correct:i===targetIdx}; }));
+        return { promptHTML: picture+'<p class="q-text">'+az('誰的身高最'+(askShort?'矮':'高')+'？（比身高要看站在箱子上面那一段）')+'</p>', choices:choices };
+      } else {
+        var n1=pick(HEIGHT_NAMES), n2=pick(HEIGHT_NAMES), n3=pick(HEIGHT_NAMES);
+        while(n2===n1) n2=pick(HEIGHT_NAMES);
+        while(n3===n1||n3===n2) n3=pick(HEIGHT_NAMES);
+        var rel1 = Math.random()<0.5;
+        var rel2 = Math.random()<0.5;
+        var text = n1+(rel1?'比'+n2+'高，':'比'+n2+'矮，')+n3+(rel2?'比'+n2+'高，':'比'+n2+'矮，');
+        var tallest=null, shortest=null;
+        if(rel1 && !rel2){ tallest=n1; shortest=n3; }
+        else if(!rel1 && rel2){ tallest=n3; shortest=n1; }
+        else if(rel1 && rel2){ shortest=n2; }
+        else { tallest=n2; }
+        var askShort2 = shortest!==null && (tallest===null || Math.random()<0.5);
+        var target2 = askShort2 ? shortest : tallest;
+        var choices2 = shuffle([n1,n2,n3].map(function(nm){ return {html:az(nm), correct:nm===target2}; }));
+        return { promptHTML: '<p class="q-text" style="margin-top:0;">'+az(text+'請問誰最'+(askShort2?'矮':'高')+'？')+'</p>', choices:choices2 };
+      }
+    });
+  }
+
+  window.__NF.STAGES.push(
+    {id:'cubes', code:'SC-1-1-2', cat:'shape', emoji:'🧊', title:'數立方體', desc:'數一數、比比看高矮', mk:makeCubes},
+    {id:'lengthCompare', code:'SC-1-1-1,2', cat:'shape', emoji:'📏', title:'量一量比一比', desc:'比比看長短，接起來幾格', mk:makeLengthCompare},
+    {id:'routeLength', code:'SC-1-1-1 路線', cat:'shape', emoji:'🐾', title:'抓路線長短', desc:'走走看哪條路比較長', mk:makeRouteLength},
+    {id:'blockMove', code:'SC-1-2-1', cat:'shape', emoji:'🧩', title:'積木搬家', desc:'找出哪一號積木被移動了', mk:makeBlockMove},
+    {id:'shapeMove', code:'SC-1-2-1 平面', cat:'shape', emoji:'🔺', title:'圖形板搬家', desc:'平面圖形版的搬家遊戲', mk:makeShapeMove},
+    {id:'heightCompare', code:'SC-1-1-1,2 身高', cat:'shape', emoji:'🧍', title:'誰最高最矮', desc:'比身高要看基準線，不能只看誰站得高', mk:makeHeightCompare}
+  );
+
+  renderHub();
+})();
+</script>
