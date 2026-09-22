@@ -432,7 +432,11 @@
   }
   function setIdentity(cls,name){ try{ localStorage.setItem('nf_class',cls); localStorage.setItem('nf_name',name); }catch(e){} }
   function clearIdentity(){ try{ localStorage.removeItem('nf_class'); localStorage.removeItem('nf_name'); }catch(e){} }
-  function getApiUrl(){ try{ return localStorage.getItem('nf_api')||''; }catch(e){ return ''; } }
+  var DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbymeX7KkuiscvkkPhIMr085r96sa3varVo_zXe7G5FUreDMBv77vRn-1xNCq86Ksb8NHw/exec';
+  function getApiUrl(){
+    try{ var v = localStorage.getItem('nf_api'); return (v && v.trim()) ? v.trim() : DEFAULT_API_URL; }
+    catch(e){ return DEFAULT_API_URL; }
+  }
   function setApiUrl(u){ try{ localStorage.setItem('nf_api', u); }catch(e){} }
   var sessionGuest = false;
 
