@@ -21,6 +21,11 @@
  *    把這個網址複製起來，貼到任一個遊戲網頁右上角的齒輪圖示設定裡即可（兩個遊戲共用同一個網址）。
  * 8. 之後如果你修改了這個程式碼，要「部署」→「管理部署作業」→
  *    點編輯（鉛筆）→版本選「新版本」→部署，網址才會套用新的程式碼。
+ *
+ * 「作答紀錄」和「數感特訓紀錄」都是最新的一筆放在標題列正下方（最上面），
+ * 不用每次都捲到表格最下面找最新資料。如果你原本已經有累積的舊資料，
+ * 那些舊資料還是照原本的順序（舊到新）留在下面，只有之後新送出的成績才會補在最上面；
+ * 想要整份都變成新到舊，可以自己選取資料範圍後用「資料」→「排序範圍」依時間欄位遞減排序一次。
  */
 
 var SHEET_ROSTER = '名單';
@@ -33,6 +38,19 @@ function getSheet_(name) {
   var sheet = ss.getSheetByName(name);
   if (!sheet) sheet = ss.insertSheet(name);
   return sheet;
+}
+
+/**
+ * 把新紀錄插在標題列正下方（最新的在最上面），而不是加在表格最後面，
+ * 這樣老師打開試算表不用捲到最下面才看得到最新的紀錄。
+ */
+function prependRow_(sheet, header, values) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(header);
+    sheet.setFrozenRows(1);
+  }
+  sheet.insertRowAfter(1);
+  sheet.getRange(2, 1, 1, values.length).setValues([values]);
 }
 
 /**
@@ -132,10 +150,7 @@ function doPost(e) {
 
     if (body.type === 'numberSense') {
       var nsSheet = getSheet_(SHEET_NS);
-      if (nsSheet.getLastRow() === 0) {
-        nsSheet.appendRow(['時間', '班級', '姓名', '模式', '答對題數', '總題數', 'XP', '平均反應時間(ms)', '等級']);
-      }
-      nsSheet.appendRow([
+      prependRow_(nsSheet, ['時間', '班級', '姓名', '模式', '答對題數', '總題數', 'XP', '平均反應時間(ms)', '等級'], [
         new Date(),
         body.className || '',
         body.studentName || '',
@@ -151,10 +166,7 @@ function doPost(e) {
     }
 
     var sheet = getSheet_(SHEET_LOG);
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['時間', '班級', '姓名', '關卡ID', '關卡名稱', '分類', '答對題數', '總題數', '星數']);
-    }
-    sheet.appendRow([
+    prependRow_(sheet, ['時間', '班級', '姓名', '關卡ID', '關卡名稱', '分類', '答對題數', '總題數', '星數'], [
       new Date(),
       body.className || '',
       body.studentName || '',
