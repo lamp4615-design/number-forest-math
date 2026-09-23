@@ -53,7 +53,8 @@
     margin-bottom:20px; overflow:hidden; position:relative; flex-wrap:wrap;
   }
   .hub-hero .txt{ max-width:480px; }
-  .hub-hero .eyebrow{ font-size:14px; letter-spacing:.06em; color:var(--accent2); font-weight:700; }
+  .hub-hero .eyebrow{ font-size:14px; letter-spacing:.06em; color:var(--accent2); font-weight:700; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .hub-hero .eyebrow a{ color:var(--accent2); text-decoration:underline; font-weight:700; }
   .hub-hero h1{ font-size:clamp(26px,5vw,36px); font-weight:800; margin-top:6px; }
   .hub-hero .sub{ color:var(--ink-soft); font-size:16px; margin-top:10px; line-height:2.1; }
   .hub-hero .mascot{ font-size:74px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.15)); }
@@ -236,7 +237,7 @@
 <div id="app">
   <div class="hub-hero">
     <div class="txt">
-      <div class="eyebrow" id="hero-eyebrow"></div>
+      <div class="eyebrow"><span id="hero-eyebrow"></span> · <a href="number-sense.html">⚡ 數感快手</a></div>
       <h1>🌲 數字森林闖關</h1>
       <p class="sub" id="hero-sub"></p>
       <div class="hub-controls">

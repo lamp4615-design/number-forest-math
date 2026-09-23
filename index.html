@@ -2,10 +2,60 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=number-forest.html">
-<title>數字森林闖關</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一年級數學樂園</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2140; --ink-soft:#5b527a; --bg:#fbf6e9; --bg2:#eef5e6;
+    --card:#ffffff; --card-border:#e7ded0; --accent:#ff6b4a; --accent-ink:#ffffff; --accent2:#2f9e8f;
+    --shadow: 0 6px 0 rgba(43,33,64,0.08), 0 10px 24px rgba(43,33,64,0.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#f1ece0; --ink-soft:#c9c2df; --bg:#1b2420; --bg2:#212c26;
+      --card:#26332c; --card-border:#3a4a40; --accent:#ff8a68; --accent-ink:#26170f; --accent2:#4bc2b0;
+      --shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 24px rgba(0,0,0,0.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink); min-height:100vh;
+    font-family:"Baloo 2","PingFang TC","Microsoft JhengHei","Heiti TC",-apple-system,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .wrap{ max-width:640px; width:100%; text-align:center; }
+  h1{ font-size:clamp(24px,5vw,32px); font-weight:800; margin:0 0 30px; }
+  .cards{ display:grid; grid-template-columns:1fr; gap:16px; }
+  @media (min-width:520px){ .cards{ grid-template-columns:1fr 1fr; } }
+  a.card{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    background:var(--card); border:2px solid var(--card-border); border-radius:22px;
+    padding:28px 18px; text-decoration:none; color:var(--ink); box-shadow:var(--shadow);
+    transition:transform .08s ease;
+  }
+  a.card:active{ transform:translateY(3px); box-shadow:none; }
+  a.card .icon{ font-size:48px; }
+  a.card .title{ font-size:19px; font-weight:800; }
+  a.card .desc{ font-size:14px; color:var(--ink-soft); line-height:1.9; }
+</style>
 </head>
 <body>
-<p>正在前往遊戲... 如果沒有自動跳轉，<a href="number-forest.html">請點這裡</a>。</p>
+<div class="wrap">
+  <h1>🎓 一年級數學樂園</h1>
+  <div class="cards">
+    <a class="card" href="number-forest.html">
+      <span class="icon">🌲</span>
+      <span class="title">數字森林闖關</span>
+      <span class="desc">18 關數學大冒險<br>數與位值、計算、量與形、時間與生活</span>
+    </a>
+    <a class="card" href="number-sense.html">
+      <span class="icon">⚡</span>
+      <span class="title">數感快手</span>
+      <span class="desc">不靠手指數數！<br>閃數快認、湊十配對、班級排行榜</span>
+    </a>
+  </div>
+</div>
 </body>
 </html>
